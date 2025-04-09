@@ -9,10 +9,66 @@ terraform {
 }
 
 resource "aws_s3_bucket" "jothi_test_bucket" {
-  bucket = "jothi-image-test-bucket-2"
+  bucket = var.image_bucket_name
 
   tags = {
-    Name        = "Terraform State Bucket"
     Environment = "dev"
+    Product = "image-scanner"
   }
+}
+
+resource "aws_dynamodb_table" "image_results" {
+  name         = var.image_results_table
+  hash_key     = "image_hash"
+  read_capacity  = 5
+  write_capacity = 5
+
+  attribute {
+    name = "image_hash"
+    type = "S"
+  }
+
+  billing_mode = "PROVISIONED"
+
+  tags = {
+    Environment = "dev"
+    Product = "image-scanner"
+  }
+
+}
+
+resource "aws_dynamodb_table" "job_results" {
+  name         = var.job_table
+  hash_key     = "job_id"
+  read_capacity  = 5
+  write_capacity = 5
+
+  attribute {
+    name = "job_id"
+    type = "S"
+  }
+
+  billing_mode = "PROVISIONED"
+
+  tags = {
+    Environment = "dev"
+    Product = "image-scanner"
+  }
+
+}
+
+
+resource "aws_api_gateway_rest_api" "api" {
+  name        = "ImageScan"
+  description = "API for image scanning"
+  tags = {
+    Environment = "dev"
+    Product = "image-scanner"
+  }
+}
+
+resource "aws_api_gateway_resource" "upload" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  parent_id   = aws_api_gateway_rest_api.api.root_resource_id
+  path_part   = "images"
 }
