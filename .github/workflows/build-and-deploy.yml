@@ -1,0 +1,100 @@
+name: CI/CD Pipeline for Lambda Deployment
+
+env:
+  AWS_REGION: 'us-east-1'
+on:
+  push:
+    branches:
+      - '*'  # Runs on all branches
+    
+  pull_request:
+    branches:
+      - main  # Runs only on PRs targeting the main branch
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+
+      # - name: Install dependencies
+      #   run: |
+      #     python -m pip install --upgrade pip
+      #     pip install -r requirements.txt
+
+      # - name: Run tests
+      #   run: |
+      #     pytest tests/
+
+  terraform_plan:
+    needs: build_and_test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'  # Only run on PRs targeting main branch
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Hashicorp - Terraform setup
+        uses: hashicorp/setup-terraform@v3.1.2
+
+      - name: Cache Terraform providers
+        uses: terraform-cache/terraform-cache@v1
+
+      - name: Configure AWS Credentials for GitHub Actions
+        uses: aws-actions/configure-aws-credentials@v4.0.2
+        with:
+          audience: sts.amazonaws.com
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: |
+          terraform fmt -recursive
+          terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan
+
+  terraform_apply:
+    needs: terraform_plan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'  # Only run on push to main
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Hashicorp - Terraform setup
+        uses: hashicorp/setup-terraform@v3.1.2
+
+      - name: Cache Terraform providers
+        uses: terraform-cache/terraform-cache@v1
+
+      - name: Configure AWS Credentials for GitHub Actions
+        uses: aws-actions/configure-aws-credentials@v4.0.2
+        with:
+          audience: sts.amazonaws.com
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: |
+          terraform fmt -recursive
+          terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
