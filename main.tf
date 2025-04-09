@@ -64,7 +64,8 @@ resource "aws_dynamodb_table" "job_results" {
     hash_key           = "image_hash"
     range_key          = "is_complete"
     projection_type    = "ALL" 
-
+    read_capacity  = 5
+    write_capacity = 5
   }
 
   tags = {
