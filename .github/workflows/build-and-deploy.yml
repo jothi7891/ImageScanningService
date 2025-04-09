@@ -11,6 +11,10 @@ on:
     branches:
       - main  # Runs only on PRs targeting the main branch
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   build_and_test:
     runs-on: ubuntu-latest
