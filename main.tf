@@ -38,23 +38,39 @@ resource "aws_dynamodb_table" "image_results" {
 }
 
 resource "aws_dynamodb_table" "job_results" {
-  name         = var.job_table
-  hash_key     = "job_id"
+  name           = var.job_table
+  hash_key       = "job_id"
   read_capacity  = 5
   write_capacity = 5
+  billing_mode   = "PROVISIONED"
 
   attribute {
     name = "job_id"
     type = "S"
   }
 
-  billing_mode = "PROVISIONED"
+  attribute {
+    name = "image_hash"
+    type = "S"
+  }
+
+  attribute {
+    name = "is_complete"
+    type = "S"
+  }
+
+  global_secondary_index {
+    name               = "image_hash-index"
+    hash_key           = "image_hash"
+    range_key          = "is_complete"
+    projection_type    = "ALL" 
+
+  }
 
   tags = {
     Environment = "dev"
-    Product = "image-scanner"
+    Product     = "image-scanner"
   }
-
 }
 
 
