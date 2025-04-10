@@ -257,7 +257,7 @@ resource "aws_api_gateway_integration_response" "images_options_integration_resp
   rest_api_id = aws_api_gateway_rest_api.image_scan_api.id
   resource_id = aws_api_gateway_resource.images.id
   http_method = aws_api_gateway_method.images_options.http_method
-  status_code = 200
+  status_code = aws_api_gateway_integration.images_options_integration.response_200.status_code
 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Origin"  = "'*'"
