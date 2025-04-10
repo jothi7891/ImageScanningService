@@ -16,8 +16,8 @@ variable "image_results_table" {
  description = "Dynamo table containing information about images loaded"
 }
 
-variable "job_table" {
+variable "requests_tracker_table" {
  type = string
- default = "JOB_RESULTS_TABLE"
- description = "User initiated job table"
+ default = "REQUESTS_TRACKER_TABLE"
+ description = "User initiated requests table"
 }
