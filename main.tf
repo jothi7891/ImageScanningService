@@ -211,3 +211,75 @@ resource "aws_api_gateway_deployment" "image_api_deployment" {
   rest_api_id = aws_api_gateway_rest_api.image_scan_api.id
   stage_name  = "prod"
 }
+
+resource "aws_api_gateway_stage" "prod_stage" {
+  stage_name   = "prod"
+  rest_api_id = aws_api_gateway_rest_api.image_scan_api.id
+  deployment_id = aws_api_gateway_deployment.image_api_deployment.id
+  
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.image_api.arn
+    format          = "requestId: $context.requestId"
+  }
+}
+
+resource "aws_api_gateway_method_settings" "prod_stage" {
+  rest_api_id = aws_api_gateway_rest_api.image_scan_api.id
+  stage_name  = aws_api_gateway_stage.prod_stage.stage_name
+  method_path = "*/*"
+
+  settings {
+    metrics_enabled = true
+    logging_level   = "INFO"
+  }
+}
+
+resource "aws_cloudwatch_log_group" "image_api" {
+  name              = "API-Gateway-Execution-Logs_${aws_api_gateway_rest_api.image_api.id}"
+  retention_in_days = 7
+}
+
+resource "aws_api_gateway_account" "api_global" {
+  cloudwatch_role_arn = aws_iam_role.cloudwatch.arn
+}
+
+data "aws_iam_policy_document" "assume_role" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["apigateway.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+resource "aws_iam_role" "cloudwatch" {
+  name               = "api_gateway_cloudwatch_global"
+  assume_role_policy = data.aws_iam_policy_document.assume_role.json
+}
+
+data "aws_iam_policy_document" "cloudwatch" {
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:DescribeLogGroups",
+      "logs:DescribeLogStreams",
+      "logs:PutLogEvents",
+      "logs:GetLogEvents",
+      "logs:FilterLogEvents",
+    ]
+
+    resources = ["*"]
+  }
+}
+resource "aws_iam_role_policy" "cloudwatch" {
+  name   = "default"
+  role   = aws_iam_role.cloudwatch.id
+  policy = data.aws_iam_policy_document.cloudwatch.json
+}
