@@ -26,10 +26,10 @@ def lambda_handler(event: dict, context) -> dict:
             }
     try:
         logging.info(f"Received image upload request - {event}")
-        body = json.loads(event['body'])
+        body = json.loads(event)
         # Extract file details from event
         file_data = body.get('file', None)
-        file_type = event.get('fileType', None)
+        file_type = body.get('fileType', None)
         
         # Validate file type
         if file_type not in ['image/jpeg', 'image/png']:
