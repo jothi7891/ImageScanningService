@@ -235,7 +235,7 @@ resource "aws_api_gateway_method_settings" "prod_stage" {
 }
 
 resource "aws_cloudwatch_log_group" "image_api" {
-  name              = "API-Gateway-Execution-Logs_${aws_api_gateway_rest_api.image_api.id}"
+  name              = "API-Gateway-Execution-Logs_${aws_api_gateway_rest_api.image_scan_api.id}"
   retention_in_days = 7
 }
 
