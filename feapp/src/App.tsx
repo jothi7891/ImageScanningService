@@ -48,11 +48,8 @@ const App: React.FC = () => {
 
       try {
         // Replace with your API Gateway URL for image upload
-        const apiUrl = 'https://your-api-gateway-url.com/upload'; // Update this
+        const apiUrl = 'https://nf0wjsdmx5.execute-api.us-east-1.amazonaws.com/prod/images'; 
         const response = await axios.post(apiUrl, payload, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
         });
 
         // Assuming the backend returns a jobId and status message

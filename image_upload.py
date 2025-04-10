@@ -36,6 +36,11 @@ def lambda_handler(event: dict, context) -> dict:
             logging.error(f"{file_type} is not supported")
             return {
                 'statusCode': 400,
+                'headers': {
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                },
                 'body': json.dumps('Invalid file type. Only JPEG and PNG are allowed.')
             }
 
@@ -53,6 +58,11 @@ def lambda_handler(event: dict, context) -> dict:
 
         return {
                 'statusCode': 200,
+                'headers': {
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                },
                 'body': json.dumps('Hang Tight. We will process your image as soon as we can.')
             }
     
@@ -60,6 +70,11 @@ def lambda_handler(event: dict, context) -> dict:
         logging.exception(f"Exception {e} during processing the event - {event}")
         return {
             'statusCode': 500,
+                'headers': {
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                },
             'body': json.dumps(f'Error processing the Image: {str(e)}')
         }
 

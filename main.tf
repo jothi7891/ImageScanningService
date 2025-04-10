@@ -222,6 +222,16 @@ resource "aws_api_gateway_method" "images_post" {
   resource_id   = aws_api_gateway_resource.images.id
   http_method   = "POST"
   authorization = "NONE"
+
+}
+
+resource "aws_api_gateway_gateway_response" "cors_4xx" {
+  rest_api_id   = aws_api_gateway_rest_api.image_scan_api.id
+  response_type = "DEFAULT_4XX"
+  response_parameters = {
+    "gatewayresponse.header.Access-Control-Allow-Origin"  = "'*'",
+    "gatewayresponse.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
+  }
 }
 
 resource "aws_api_gateway_integration" "image_upload_lambda_integration" {
@@ -231,6 +241,7 @@ resource "aws_api_gateway_integration" "image_upload_lambda_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = aws_lambda_function.image_upload.invoke_arn
+
 }
 
 resource "aws_api_gateway_deployment" "image_api_deployment" {
@@ -310,3 +321,4 @@ resource "aws_iam_role_policy" "cloudwatch" {
   role   = aws_iam_role.cloudwatch.id
   policy = data.aws_iam_policy_document.cloudwatch.json
 }
+
