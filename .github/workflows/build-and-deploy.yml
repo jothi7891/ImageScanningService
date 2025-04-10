@@ -97,8 +97,8 @@ jobs:
 
       - name: Zip Lambda Code
         run: |
-          zip -r image_upload.zip image_upload.py
-          zip -r image_scanner.zip image_scanner.py
+          zip -r image_upload.zip ./image_upload.py
+          zip -r image_scanner.zip ./image_scanner.py
   
       - name: Upload to S3
         run: |
