@@ -2,6 +2,7 @@ import json
 import hashlib
 import base64
 import os
+import sys
 import logging
 import uuid
 from datetime import datetime
@@ -10,8 +11,11 @@ from datetime import datetime
 import boto3
 from botocore.exceptions import ClientError
 
-logging.basicConfig()
-logging.getLogger().setLevel(logging.INFO)
+logging.basicConfig(level=logging.INFO,
+                    format="%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s",
+                    handlers=[
+                        logging.StreamHandler(sys.stdout)
+                    ])
 
 logger = logging.getLogger(__name__)
 
@@ -109,7 +113,7 @@ def create_job_with_status(request_id: str, image_hash: str, status: str, reques
                 'request_id': request_id,
                 'request_time': datetime.now().isoformat(),
                 'request_status': status,
-                'image_processing_status': 'pending',
+                'image_status': 'pending',
                 'image_hash': image_hash,
                 'labels': request_label,
                 'label_matched': False
