@@ -174,7 +174,7 @@ resource "aws_lambda_function" "image_upload" {
 }
 
 data "aws_s3_object" "image_upload_zip" {
-  bucket = var.image_bucket_name
+  bucket = var.lambda_deployment_bucket_name
   key    = var.image_uploader_s3_key
 }
 
@@ -197,7 +197,7 @@ resource "aws_lambda_function" "image_scanner_handler" {
 }
 
 data "aws_s3_object" "image_scanner_zip" {
-  bucket = var.image_bucket_name
+  bucket = var.lambda_deployment_bucket_name
   key    = var.image_scanner_s3_key
 }
 
