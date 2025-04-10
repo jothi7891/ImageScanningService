@@ -97,13 +97,13 @@ jobs:
 
       - name: Zip Lambda Code
         run: |
-          zip image_upload.zip image_upload.py
-          zip image_scanner.zip image_scanner.py
+          zip image_upload.zip ./image_upload.py
+          zip image_scanner.zip ./image_scanner.py
   
       - name: Upload to S3
         run: |
-          aws s3 cp image_upload.zip s3://my-lambda-deployments/latest/image_upload.zip
-          aws s3 cp image_scanner.zip s3://my-lambda-deployments/latest/image_scanner.zip
+          aws s3 cp image_upload.zip s3://jothi-lambda-deployments/image_upload.zip
+          aws s3 cp image_scanner.zip s3://jothi-lambda-deployments/image_scanner.zip
 
       - name: Terraform Apply
         run: terraform apply -auto-approve
