@@ -5,11 +5,16 @@ import os
 import boto3
 from botocore.exceptions import ClientError
 
+logging.basicConfig()
+logging.getLogger().setLevel(logging.INFO)
+
+logger = logging.getLogger(__name__)
+
 # Initialize DynamoDB client
 
 image_table = os.environ['IMAGE_DETAIL_TABLE']  # Table name from environment variable
-job_table = os.environ['USER_REQUEST_TRACKER_TABLE']
-bucket_name = os.environ['S3_BUCKET_NAME']    # S3 bucket name
+request_tracker_table = os.environ['REQUEST_TRACKER_TABLE']
+bucket_name = os.environ['IMAGE_STORAGE_BUCKET']    # S3 bucket name
 
 rekognition = boto3.client('rekognition')
 dynamodb = boto3.resource('dynamodb')
@@ -94,6 +99,23 @@ def store_image_metadata(image_hash: str, s3_key: str, file_type: str):
 
     except ClientError as e:
         raise Exception(f"Error storing {item} in DynamoDB: {str(e)}")
+
+def image_already_exists(image_sha: str) -> bool:
+    """Check if image already exists in DynamoDB"""
+    try:
+        # Check if the item with the image_sha already exists
+        response = image_table.get_item(
+            Key={'image_sha': image_sha}
+        )
+        
+        if 'Item' in response:
+            return True
+        else:
+            return False
+
+    except ClientError as e:
+        return False
+
 
 def update_jobs_with_status(job_id: str, image_hash: str, status: bool) -> str:
     """ Create a Job ID for the user request and tie with the Image hash"""

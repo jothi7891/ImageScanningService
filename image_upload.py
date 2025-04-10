@@ -10,6 +10,10 @@ from datetime import datetime
 import boto3
 from botocore.exceptions import ClientError
 
+logging.basicConfig()
+logging.getLogger().setLevel(logging.INFO)
+
+logger = logging.getLogger(__name__)
 
 # Initialize DynamoDB client
 
@@ -26,11 +30,13 @@ def lambda_handler(event: dict, context) -> dict:
             }
     try:
         logging.info(f"Received image upload request - {event}")
-        body = json.loads(event)
         # Extract file details from event
+
+        body = json.lodas(event.get('body', ''))
         file_data = body.get('file', None)
         file_type = body.get('fileType', None)
-        
+        request_label = body.get('label', 'cat')
+
         # Validate file type
         if file_type not in ['image/jpeg', 'image/png']:
             logging.error(f"{file_type} is not supported")
@@ -52,7 +58,8 @@ def lambda_handler(event: dict, context) -> dict:
 
         image_hash = sha256_of_image(image_content)
 
-        create_job_with_status(uuid.uuid4(),image_hash, False)
+        create_job_with_status(uuid.uuid4(),image_hash, 'pending', request_label)
+
         store_image_in_s3(s3_key=f"{image_hash}.{file_extensions[file_type]}")
 
 
