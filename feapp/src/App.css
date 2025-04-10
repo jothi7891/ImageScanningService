@@ -1,0 +1,141 @@
+/* Global Styles */
+body {
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f9;
+  color: #333;
+}
+
+/* Container for the entire App */
+.App {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  padding: 20px;
+  text-align: center;
+}
+
+/* Heading styles */
+h1 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #5e8b7e;
+  font-weight: 600;
+}
+
+/* File input label styling */
+label.upload-label {
+  display: inline-block;
+  background-color: #5e8b7e;
+  color: white;
+  padding: 12px 30px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+label.upload-label:hover {
+  background-color: #4c7c69;
+}
+
+/* Upload button styling */
+button {
+  background-color: #ff914d;
+  border: none;
+  color: white;
+  padding: 10px 25px;
+  font-size: 1rem;
+  margin-top: 20px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #e87e3b;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Check status button */
+.check-status-container button {
+  background-color: #5e8b7e;
+  color: white;
+  padding: 10px 20px;
+  font-size: 1rem;
+  margin-top: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.check-status-container button:hover {
+  background-color: #4c7c69;
+}
+
+.check-status-container button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Input box styling */
+.job-id-input {
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+}
+
+/* Error message */
+.error-message {
+  color: red;
+}
+
+/* Result container */
+.result-container {
+  margin-top: 20px;
+  background-color: #f0f8ff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.result-container p {
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.file-info {
+  margin-top: 15px;
+  font-size: 1rem;
+  color: #333;
+}
+
+.image-preview {
+  margin-top: 10px;
+  max-width: 200px;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.job-id-display {
+  margin-top: 20px;
+  background-color: #e0ffe0;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.job-id-display p {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #2d8f2d;
+}
