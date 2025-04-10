@@ -88,13 +88,13 @@ resource "aws_dynamodb_table" "image_results" {
 
 resource "aws_dynamodb_table" "requests_tracker_table" {
   name           = var.requests_tracker_table
-  hash_key       = "job_id"
+  hash_key       = "request_id"
   read_capacity  = 5
   write_capacity = 5
   billing_mode   = "PROVISIONED"
 
   attribute {
-    name = "job_id"
+    name = "request_id"
     type = "S"
   }
 
@@ -103,15 +103,10 @@ resource "aws_dynamodb_table" "requests_tracker_table" {
     type = "S"
   }
 
-  attribute {
-    name = "is_complete"
-    type = "S"
-  }
 
   global_secondary_index {
     name               = "image_hash-index"
     hash_key           = "image_hash"
-    range_key          = "is_complete"
     projection_type    = "ALL" 
     read_capacity  = 5
     write_capacity = 5
@@ -215,6 +210,60 @@ resource "aws_api_gateway_resource" "images" {
   rest_api_id = aws_api_gateway_rest_api.image_scan_api.id
   parent_id   = aws_api_gateway_rest_api.image_scan_api.root_resource_id
   path_part   = "images"
+}
+
+# Create an OPTIONS method for CORS preflight
+resource "aws_api_gateway_method" "images_options" {
+  rest_api_id   = aws_api_gateway_rest_api.image_scan_api.id
+  resource_id   = aws_api_gateway_resource.images.id
+  http_method   = "OPTIONS"
+  authorization = "NONE"
+}
+
+# Setup OPTIONS method response to allow CORS headers
+resource "aws_api_gateway_method_response" "options_method_response" {
+  rest_api_id = aws_api_gateway_rest_api.image_scan_api.id
+  resource_id = aws_api_gateway_resource.images.id
+  http_method = aws_api_gateway_method.options_method.http_method
+  status_code = 200
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin"      = true
+    "method.response.header.Access-Control-Allow-Headers"     = true
+    "method.response.header.Access-Control-Allow-Methods"     = true
+  }
+}
+
+# Setup the OPTIONS method integration (Mock Integration for CORS)
+resource "aws_api_gateway_integration" "images_options_integration" {
+  rest_api_id = aws_api_gateway_rest_api.image_scan_api.id
+  resource_id = aws_api_gateway_resource.images.id
+  http_method = aws_api_gateway_method.images_options.http_method
+  integration_http_method = "POST"
+  type                    = "MOCK"
+
+  request_templates = {
+    "application/json" = <<-EOF
+      {
+        "statusCode": 200
+      }
+    EOF
+  }
+
+}
+
+# Set the OPTIONS integration response for CORS headers
+resource "aws_api_gateway_integration_response" "images_options_integration_response" {
+  rest_api_id = aws_api_gateway_rest_api.image_scan_api.id
+  resource_id = aws_api_gateway_resource.images.id
+  http_method = aws_api_gateway_method.images_options.http_method
+  status_code = 200
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
+    "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,GET,POST'"
+  }
 }
 
 resource "aws_api_gateway_method" "images_post" {

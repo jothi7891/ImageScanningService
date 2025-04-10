@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from datetime import datetime
 
 import boto3
 from botocore.exceptions import ClientError
@@ -18,7 +19,6 @@ bucket_name = os.environ['IMAGE_STORAGE_BUCKET']    # S3 bucket name
 
 rekognition = boto3.client('rekognition')
 dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table('ScanResults')
 
 def lambda_handler(event, context):
     bucket_name = event.get('bucketName')
@@ -37,8 +37,6 @@ def lambda_handler(event, context):
     # Call Rekognition to analyze the image
     try:
 
-        # Store scan results in DynamoDB
-        result = json.dumps(response)
         table.put_item(
             Item={
                 'imageId': file_name,
