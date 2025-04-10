@@ -30,6 +30,13 @@ resource "aws_s3_bucket_acl" "image_store_bucket" {
   acl        = "private"
 }
 
+resource "aws_s3_bucket_versioning" "image_store_bucket" {
+  bucket = aws_s3_bucket.image_store_bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
 resource "aws_s3_bucket" "lambda_deployment_bucket" {
   bucket = var.lambda_deployment_bucket_name
 
@@ -39,39 +46,24 @@ resource "aws_s3_bucket" "lambda_deployment_bucket" {
   }
 }
 
-resource "aws_s3_bucket_ownership_controls" "image_store_bucket" {
-  bucket = aws_s3_bucket.image_store_bucket.id
+resource "aws_s3_bucket_ownership_controls" "lambda_deployment_bucket" {
+  bucket = aws_s3_bucket.lambda_deployment_bucket.id
   rule {
     object_ownership = "BucketOwnerPreferred"
   }
 }
 
-resource "aws_s3_bucket_acl" "jothi_test_bucket" {
-  depends_on = [aws_s3_bucket_ownership_controls.image_store_bucket]
-  bucket     = aws_s3_bucket.image_store_bucket.id
+resource "aws_s3_bucket_acl" "lambda_deployment_bucket" {
+  depends_on = [aws_s3_bucket_ownership_controls.lambda_deployment_bucket]
+  bucket     = aws_s3_bucket.lambda_deployment_bucket.id
   acl        = "private"
 }
 
-resource "aws_s3_bucket" "jothi_test_bucket" {
-  bucket = var.image_bucket_name
-
-  tags = {
-    Environment = "dev"
-    Product = "image-scanner"
+resource "aws_s3_bucket_versioning" "lambda_deployment_bucket" {
+  bucket = aws_s3_bucket.lambda_deployment_bucket.id
+  versioning_configuration {
+    status = "Enabled"
   }
-}
-
-resource "aws_s3_bucket_ownership_controls" "jothi_test_bucket" {
-  bucket = aws_s3_bucket.jothi_test_bucket.id
-  rule {
-    object_ownership = "BucketOwnerPreferred"
-  }
-}
-
-resource "aws_s3_bucket_acl" "jothi_test_bucket" {
-  depends_on = [aws_s3_bucket_ownership_controls.jothi_test_bucket]
-  bucket     = aws_s3_bucket.jothi_test_bucket.id
-  acl        = "private"
 }
 
 resource "aws_dynamodb_table" "image_results" {
