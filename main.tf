@@ -252,20 +252,6 @@ resource "aws_api_gateway_integration" "images_options_integration" {
 
 }
 
-# Set the OPTIONS integration response for CORS headers
-resource "aws_api_gateway_integration_response" "images_options_integration_response" {
-  rest_api_id = aws_api_gateway_rest_api.image_scan_api.id
-  resource_id = aws_api_gateway_resource.images.id
-  http_method = aws_api_gateway_method.images_options.http_method
-  status_code = aws_api_gateway_integration.images_options_integration.response_200.status_code
-
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
-    "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,GET,POST'"
-  }
-}
-
 resource "aws_api_gateway_method" "images_post" {
   rest_api_id   = aws_api_gateway_rest_api.image_scan_api.id
   resource_id   = aws_api_gateway_resource.images.id
@@ -274,14 +260,6 @@ resource "aws_api_gateway_method" "images_post" {
 
 }
 
-resource "aws_api_gateway_gateway_response" "cors_4xx" {
-  rest_api_id   = aws_api_gateway_rest_api.image_scan_api.id
-  response_type = "DEFAULT_4XX"
-  response_parameters = {
-    "gatewayresponse.header.Access-Control-Allow-Origin"  = "'*'",
-    "gatewayresponse.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
-  }
-}
 
 resource "aws_api_gateway_integration" "image_upload_lambda_integration" {
   rest_api_id             = aws_api_gateway_rest_api.image_scan_api.id
