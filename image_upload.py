@@ -32,7 +32,7 @@ def lambda_handler(event: dict, context) -> dict:
         logging.info(f"Received image upload request - {event}")
         # Extract file details from event
 
-        body = json.lodas(event.get('body', ''))
+        body = json.loads(event.get('body', ''))
         file_data = body.get('file', None)
         file_type = body.get('fileType', None)
         request_label = body.get('label', 'cat')
