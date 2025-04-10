@@ -74,18 +74,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: test Code
-        run: |
-          ls -lrt
-          pwd
-
       - name: Hashicorp - Terraform setup
         uses: hashicorp/setup-terraform@v3.1.2
-
-      - name: test Code
-        run: |
-          ls -lrt
-          pwd
 
       - name: Configure AWS Credentials for GitHub Actions
         uses: aws-actions/configure-aws-credentials@v4.0.2
@@ -96,10 +86,8 @@ jobs:
 
       - name: Zip Lambda Code
         run: |
-          ls -lrt
-          pwd
-          zip image_upload.zip ./image_upload.py
-          zip image_scanner.zip ./image_scanner.py
+          zip image_upload.zip image_upload.py
+          zip image_scanner.zip image_scanner.py
 
       - name: Upload to S3
         run: |
