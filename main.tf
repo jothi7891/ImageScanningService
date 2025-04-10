@@ -105,7 +105,7 @@ resource "aws_dynamodb_table" "requests_tracker_table" {
 
 
   global_secondary_index {
-    name               = "image_hash-index"
+    name               = var.requests_tracker_index
     hash_key           = "image_hash"
     projection_type    = "ALL" 
     read_capacity  = 5
@@ -187,6 +187,7 @@ resource "aws_lambda_function" "image_scanner_handler" {
       REQUEST_TRACKER_TABLE = var.requests_tracker_table
       IMAGE_STORAGE_BUCKET = var.image_bucket_name
       IMAGE_DETAIL_TABLE = var.image_results_table
+      REQUEST_TRACKER_IMAGE_INDEX = var.requests_tracker_index
     }
   }
 }

@@ -22,6 +22,11 @@ variable "requests_tracker_table" {
  description = "User initiated requests table"
 }
 
+variable "requests_tracker_index" {
+ type = string
+ default = "image_hash-index"
+ description = "User initiated requests table"
+}
 
 variable "image_uploader_s3_key" {
  type = string
