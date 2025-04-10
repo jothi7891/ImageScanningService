@@ -231,8 +231,10 @@ resource "aws_api_gateway_method_response" "options_method_response" {
     "method.response.header.Access-Control-Allow-Origin"      = true
     "method.response.header.Access-Control-Allow-Headers"     = true
     "method.response.header.Access-Control-Allow-Methods"     = true
+    "method.response.header.Access-Control-Allow-Credentials" = true
   }
 }
+
 
 # Setup the OPTIONS method integration (Mock Integration for CORS)
 resource "aws_api_gateway_integration" "images_options_integration" {
@@ -272,9 +274,15 @@ resource "aws_api_gateway_integration" "image_upload_lambda_integration" {
 }
 
 resource "aws_api_gateway_deployment" "image_api_deployment" {
-  depends_on = [aws_api_gateway_integration.image_upload_lambda_integration]
+  depends_on = [
+    aws_api_gateway_integration.image_upload_lambda_integration,
+    aws_api_gateway_method.images_options,
+    aws_api_gateway_method.images_post
+    ]
   rest_api_id = aws_api_gateway_rest_api.image_scan_api.id
   stage_name  = "prod"
+
+
 }
 
 resource "aws_api_gateway_stage" "prod_stage" {
