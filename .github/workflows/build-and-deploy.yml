@@ -54,16 +54,6 @@ jobs:
           audience: sts.amazonaws.com
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
-        
-      - name: Zip Lambda Code
-        run: |
-          zip -r image_upload.zip image_upload.py
-          zip -r image_scanner.zip image_scanner.py
-  
-      - name: Upload to S3
-        run: |
-          aws s3 cp image_upload.zip s3://my-lambda-deployments/latest/image_upload.zip
-          aws s3 cp image_scanner.zip s3://my-lambda-deployments/latest/image_scanner.zip
 
       - name: Terraform Init
         run: terraform init
@@ -104,6 +94,16 @@ jobs:
 
       - name: Terraform Plan
         run: terraform plan
+
+      - name: Zip Lambda Code
+        run: |
+          zip -r image_upload.zip image_upload.py
+          zip -r image_scanner.zip image_scanner.py
+  
+      - name: Upload to S3
+        run: |
+          aws s3 cp image_upload.zip s3://my-lambda-deployments/latest/image_upload.zip
+          aws s3 cp image_scanner.zip s3://my-lambda-deployments/latest/image_scanner.zip
 
       - name: Terraform Apply
         run: terraform apply -auto-approve
