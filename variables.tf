@@ -21,3 +21,17 @@ variable "requests_tracker_table" {
  default = "REQUESTS_TRACKER_TABLE"
  description = "User initiated requests table"
 }
+
+
+variable "image_uploader_s3_key" {
+ type = string
+ default = "image_uploader.zip"
+ description = "User initiated requests table"
+}
+
+
+variable "image_scanner_s3_key" {
+ type = string
+ default = "image_scanner.zip"
+ description = "User initiated requests table"
+}

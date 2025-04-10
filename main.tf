@@ -163,6 +163,7 @@ resource "aws_lambda_function" "image_upload" {
   runtime       = "python3.12"
   handler       = "image_upload.lambda_handler"
   role          = aws_iam_role.lambda_exec.arn
+  s3_object_version = data.aws_s3_object.image_upload_zip.version_id
 
   environment {
     variables = {
@@ -172,6 +173,11 @@ resource "aws_lambda_function" "image_upload" {
   }
 }
 
+data "aws_s3_object" "image_upload_zip" {
+  bucket = var.image_bucket_name
+  key    = var.image_uploader_s3_key
+}
+
 resource "aws_lambda_function" "image_scanner_handler" {
   function_name = "image_scanner"
   s3_bucket     = aws_s3_bucket.lambda_deployment_bucket.id
@@ -179,6 +185,7 @@ resource "aws_lambda_function" "image_scanner_handler" {
   runtime       = "python3.12"
   handler       = "image_scanner.lambda_handler"
   role          = aws_iam_role.lambda_exec.arn
+  s3_object_version = data.aws_s3_object.image_scanner_zip.version_id
 
   environment {
     variables = {
@@ -187,6 +194,11 @@ resource "aws_lambda_function" "image_scanner_handler" {
       IMAGE_DETAIL_TABLE = var.image_results_table
     }
   }
+}
+
+data "aws_s3_object" "image_scanner_zip" {
+  bucket = var.image_bucket_name
+  key    = var.image_scanner_s3_key
 }
 
 resource "aws_api_gateway_rest_api" "image_scan_api" {
