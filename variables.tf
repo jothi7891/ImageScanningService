@@ -25,7 +25,7 @@ variable "requests_tracker_table" {
 
 variable "image_uploader_s3_key" {
  type = string
- default = "image_uploader.zip"
+ default = "image_upload.zip"
  description = "User initiated requests table"
 }
 
