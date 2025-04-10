@@ -4,6 +4,12 @@ variable "image_bucket_name" {
  description = "S3 storage bucket for Images"
 }
 
+variable "lambda_deployment_bucket_name" {
+ type = string
+ default = "jothi-lambda-deployments"
+ description = "S3 storage bucket for lamnbda deployments"
+}
+
 variable "image_results_table" {
  type = string
  default = "IMAGE_RESULTS_TABLE"
