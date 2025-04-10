@@ -43,7 +43,8 @@ const App: React.FC = () => {
 
       const payload = {
         file: base64String,
-        fileType: selectedImage.type
+        fileType: selectedImage.type,
+        label: 'cat'
       };
 
       try {

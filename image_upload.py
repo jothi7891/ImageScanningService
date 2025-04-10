@@ -58,7 +58,7 @@ def lambda_handler(event: dict, context) -> dict:
 
         image_hash = sha256_of_image(image_content)
 
-        create_job_with_status(uuid.uuid4(),image_hash, 'pending', request_label)
+        create_job_with_status(str(uuid.uuid4()),image_hash, 'pending', request_label)
 
         store_image_in_s3(s3_key=f"{image_hash}.{file_extensions[file_type]}")
 
