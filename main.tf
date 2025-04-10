@@ -157,7 +157,7 @@ resource "aws_iam_role_policy_attachment" "lambda_logs" {
 
 #Lambda for handling 
 resource "aws_lambda_function" "image_upload" {
-  function_name = "my-function"
+  function_name = "image_uploader"
   s3_bucket     = aws_s3_bucket.lambda_deployment_bucket.id
   s3_key        = "image_upload.zip"
   runtime       = "python3.12"
@@ -166,7 +166,7 @@ resource "aws_lambda_function" "image_upload" {
 }
 
 resource "aws_lambda_function" "image_scanner_handler" {
-  function_name = "my-function"
+  function_name = "image_scanner"
   s3_bucket     = aws_s3_bucket.lambda_deployment_bucket.id
   s3_key        = "image_scanner.zip"
   runtime       = "python3.12"
