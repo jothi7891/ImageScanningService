@@ -75,8 +75,8 @@ jobs:
     needs: build_and_test
     runs-on: ubuntu-latest
     outputs:
-      api_gateway_url : ${{ steps.set_output.outputs.api_gw_url }}
-      fe_bucket : ${{ steps.set_output.outputs.fe_bucket }}
+      api_gateway_url : ${{ steps.tf_output.outputs.api_gw_url }}
+      fe_bucket : ${{ steps.tf_output.outputs.fe_bucket }}
 
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'  # Only run on push to main
     steps:
@@ -142,9 +142,11 @@ jobs:
         run: |
           cd infra
           terraform apply -auto-approve
+
       - name: Export some outputs
-        id: set_output
+        id: tf_output
         run: |
+          cd infra 
           echo "api_gw_url=$(terraform output -raw api_gateway_url)" >> $GITHUB_OUTPUT
           echo "fe_bucket=$(terraform output -raw fe_deploy_bucket_name)" >> $GITHUB_OUTPUT
 
