@@ -169,7 +169,8 @@ resource "aws_lambda_function" "image_requests" {
   handler       = "image_requests.lambda_handler"
   role          = aws_iam_role.lambda_exec.arn
   s3_object_version = data.aws_s3_object.image_requests_zip.version_id
-
+  timeout = 30
+  
   environment {
     variables = {
       REQUEST_TRACKER_TABLE = var.requests_tracker_table
@@ -193,6 +194,7 @@ resource "aws_lambda_function" "image_scanner_handler" {
   handler       = "image_scanner.lambda_handler"
   role          = aws_iam_role.lambda_exec.arn
   s3_object_version = data.aws_s3_object.image_scanner_zip.version_id
+  timeout = 30
 
   environment {
     variables = {

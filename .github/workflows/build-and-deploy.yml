@@ -36,7 +36,7 @@ jobs:
       #   run: |
       #     pytest tests/
 
-  deploy_plan:
+  backend_plan:
     needs: build_and_test
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'  # Only run on PRs targeting main branch
@@ -71,9 +71,13 @@ jobs:
           cd infra
           terraform plan
 
-  deploy_apply:
+  backend_deploy:
     needs: build_and_test
     runs-on: ubuntu-latest
+    outputs:
+      api_gateway_url : ${{ steps.set_output.outputs.api_gw_url }}
+      fe_bucket : ${{ steps.set_output.outputs.fe_bucket }}
+
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'  # Only run on push to main
     steps:
       - name: Checkout repository
@@ -138,3 +142,44 @@ jobs:
         run: |
           cd infra
           terraform apply -auto-approve
+      - name: Export some outputs
+        id: set_output
+        run: |
+          echo "api_gw_url=$(terraform output -raw api_gateway_url)" >> $GITHUB_OUTPUT
+          echo "fe_bucket=$(terraform output -raw fe_deploy_bucket_name)" >> $GITHUB_OUTPUT
+
+  deploy_fe:
+    needs: backend_deploy
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'  # Only run on push to main
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Configure AWS Credentials for GitHub Actions
+        uses: aws-actions/configure-aws-credentials@v4.0.2
+        with:
+          audience: sts.amazonaws.com
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
+      
+      - name:
+        run: |
+            echo "API GW URL: ${{ needs.backend_deploy.outputs.api_gateway_url}}"
+            echo "FE bucket: ${{ needs.backend_deploy.outputs.fe_bucket}}"
+
+      - name: Build FE
+        run: |
+          cd feapp
+          npm run build
+
+      - name: Upload to S3
+        run: |
+          cd feapp
+          aws s3 sync ./build s3://jothi-image-scanner-fe-app --delete

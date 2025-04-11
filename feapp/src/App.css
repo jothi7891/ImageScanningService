@@ -139,3 +139,71 @@ button:disabled {
   font-weight: 500;
   color: #2d8f2d;
 }
+
+.debug-checkbox {
+  margin: 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  
+  input[type="checkbox"] {
+    margin: 0;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.stylish-upload-button {
+  display: inline-block;
+  padding: 12px 24px;
+  background: #889199;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid #1976D2;
+  
+  &:hover {
+    background: #90b0ba;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.debug-content {
+  height: 300px; /* Fixed height ensures consistent scroll behavior */
+  padding: 1rem;
+  margin: 0;
+  overflow-x: auto;
+  overflow-y: scroll;
+  background: white;
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-size: 0.85em;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Custom scrollbar styling */
+.debug-content::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.debug-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.debug-content::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 4px;
+}
+
+.debug-content::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}

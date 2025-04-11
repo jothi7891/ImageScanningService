@@ -5,7 +5,7 @@ import './App.css'
 
 // Define types for the response
 interface ScanResult {
-  requestId: string;
+  request_id: string;
   label: string;
   label_matched: boolean;
   debug_data?: string;
@@ -26,6 +26,7 @@ const App: React.FC = () => {
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [isCheckingStatus, setIsCheckingStatus] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [includeDebugData, setIncludeDebugData] = useState(false);
 
   // Handle file input change
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,9 +64,9 @@ const App: React.FC = () => {
 
         setRequestId(response.data.request_id);
         
-      } catch (error) {
+      } catch (error:any) {
         console.error("Error uploading the image:", error);
-        setErrorMessage("Failed to upload image. Please try again.");
+        setErrorMessage(error.response.data.message);
       } finally {
         setIsUploading(false);
       }
@@ -74,10 +75,21 @@ const App: React.FC = () => {
     reader.readAsDataURL(selectedImage);
   };
 
+      // Add this utility function at the top of your file
+    const formatDebugData = (data: any): string => {
+      try {
+        if (typeof data === 'string') return data;
+        if (!data) return 'No debug data available';
+        return JSON.stringify(data, null, 2); // Pretty-print with 2-space indentation
+      } catch (e) {
+        return 'Could not format debug data';
+      }
+    };
+
   // Check status of the image processing based on Job ID
   const checkStatus = async () => {
     if (!requestId) {
-      setErrorMessage("Please enter a valid Job ID.");
+      setErrorMessage("Please enter a valid Request ID.");
       return;
     }
 
@@ -87,7 +99,12 @@ const App: React.FC = () => {
     try {
       // Replace with your API Gateway URL for checking status
       const apiUrl = `${process.env.REACT_APP_BACKEND_API_URL}/scanrequest/${requestId}`; 
-      const response = await axios.get(apiUrl);
+      const response = await axios.get(apiUrl, {
+        params: {
+          debugData: includeDebugData ? 'Y' : undefined
+        }
+      });
+      setScanResult(response.data);
 
     } catch (error) {
       console.error("Error checking status:", error);
@@ -108,8 +125,8 @@ const App: React.FC = () => {
         onChange={handleFileChange}
         style={{ display: 'none' }} // Hide the file input
       />
-      <label htmlFor="image-upload" className="label-upload">
-        'Choose Image'
+      <label htmlFor="image-upload" className="stylish-upload-button">
+        <span>📷 Choose Image</span>
       </label>
 
       {/* Display the selected file information */}
@@ -135,22 +152,6 @@ const App: React.FC = () => {
       {/* Display Error Messages */}
       {errorMessage && <p className="error-message">{errorMessage}</p>}
 
-      {/* Display Image Scan Result */}
-      {scanResult && (
-        <div className="result-container">
-          <p>{scanResult.message}</p>
-          <p>Status: {scanResult.status}</p>
-          {scanResult.status === 'Processing' && (
-            <button onClick={checkStatus} disabled={isCheckingStatus}>
-              {isCheckingStatus ? 'Checking Status...' : 'Check Status'}
-            </button>
-          )}
-          {scanResult.status === 'Completed' && (
-            <p>{scanResult.label_matched ? 'This image contains a `${scanResult.labels}`' : 'No `${scanResult.labels}` detected in this image.'}</p>
-          )}
-        </div>
-      )}
-
       {/* Check Status by Job ID */}
       <div className="check-status-container">
         <h2>Check Image Status by Job ID</h2>
@@ -161,6 +162,15 @@ const App: React.FC = () => {
           placeholder="Enter Job ID"
           className="job-id-input"
         />
+
+        <label className="debug-checkbox">
+        <input
+          type="checkbox"
+          checked={includeDebugData}
+          onChange={(e) => setIncludeDebugData(e.target.checked)}
+        />
+        Include Debug Data
+      </label>
         <button onClick={checkStatus} disabled={isCheckingStatus}>
           {isCheckingStatus ? 'Checking Status...' : 'Get Status'}
         </button>
@@ -173,6 +183,30 @@ const App: React.FC = () => {
           <p>You can now check the status of your image processing using this Job ID.</p>
         </div>
       )}
+
+      {/* Display Image Scan Result */}
+      {scanResult && (
+        <div className="result-container">
+          <p>{scanResult.message}</p>
+          <p>Status: {scanResult.status}</p>
+          {scanResult.status === 'completed' && (
+            <p>
+              {scanResult.label_matched 
+                ? `This ${scanResult.request_id} image contains a ${scanResult.label}` 
+                : `No ${scanResult.label} detected in this image request ${scanResult.request_id}.`}
+            </p>
+
+          )}
+
+        {scanResult?.debug_data && (
+          <div className="debug-content">
+            <h4>Debug Information:</h4>
+            <pre>{formatDebugData(scanResult.debug_data)}</pre>
+          </div>
+        )}
+        </div>
+      )}
+
     </div>
   );
 }
