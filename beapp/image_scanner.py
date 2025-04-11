@@ -6,7 +6,8 @@ from datetime import datetime
 import boto3
 from pynamodb.exceptions import DoesNotExist
 
-from models import RequestTracker, ImageDetail
+from models.request_tracker import RequestTracker
+from models.image_details import ImageDetail
 
 # Logging configuration
 logging.basicConfig(level=logging.INFO,
@@ -59,16 +60,10 @@ def update_image_metadata_with_labels(image_hash: str, labels: dict, status: str
         Update the status of image hash in image table
     """
     try:
-        # Update the image item using PynamoDB's save method
-        item = {
-            'labels': json.dumps(labels),
-            'image_status': status,
-            'image_processing_completed': datetime.now().isoformat()
-        }
 
         image_detail = ImageDetail.get(image_hash)  # Retrieve the image detail
         image_detail.update(actions=[
-            ImageDetail.labels.set(json.dumps(labels)),
+            ImageDetail.labels.set(labels),
             ImageDetail.image_status.set(status),
             ImageDetail.image_processing_completed.set(datetime.now().isoformat())
         ])

@@ -11,7 +11,7 @@ from datetime import datetime
 import boto3
 from pynamodb.exceptions import ClientError
 
-from models import RequestTracker
+from models.request_tracker import RequestTracker
 
 image_store = os.environ['IMAGE_STORAGE_BUCKET']  # S3 bucket name
 s3 = boto3.client('s3')
