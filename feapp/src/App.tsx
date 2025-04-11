@@ -13,11 +13,11 @@ interface ScanResult {
   status?: string;
 }
 
-interface RequestResult {
-  requestId: string;
-  message: string;
-  status: string;
-}
+// interface RequestResult {
+//   requestId: string;
+//   message: string;
+//   status: string;
+// }
 
 const App: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
