@@ -298,7 +298,7 @@ resource "aws_api_gateway_method" "images_post" {
 
 }
 
-# POST method
+# GET method
 resource "aws_api_gateway_method" "images_idpath_get" {
   rest_api_id   = aws_api_gateway_rest_api.image_scan_api.id
   resource_id   = aws_api_gateway_resource.images_idpath.id
@@ -329,6 +329,7 @@ resource "aws_api_gateway_integration" "image_status_lambda_integration" {
   resource_id             = aws_api_gateway_resource.images_idpath.id
   http_method             = aws_api_gateway_method.images_idpath_get.http_method
   type                    = "AWS_PROXY"
+  integration_http_method = "POST"
   uri                     = aws_lambda_function.image_requests.invoke_arn
 
   request_parameters = {
