@@ -22,7 +22,7 @@ class RequestTracker(Model):
 
     request_id = UnicodeAttribute(hash_key=True)
     request_start_time = UnicodeAttribute()
-    request_complete_time = UnicodeAttribute()
+    request_complete_time = UnicodeAttribute(null=True)
     image_hash = UnicodeAttribute()
     request_status = UnicodeAttribute()
     label_matched = BooleanAttribute(null=True)
