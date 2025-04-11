@@ -135,13 +135,6 @@ resource "aws_iam_role" "lambda_exec" {
       Principal = {
         Service = "lambda.amazonaws.com"
       }
-    },
-    {
-      Effect = "Allow",
-      Principal = {
-        Service = "apigateway.amazonaws.com"
-      },
-      Action = "lambda:InvokeFunction"
     }
     ]
   })
