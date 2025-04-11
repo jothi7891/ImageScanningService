@@ -154,7 +154,7 @@ jobs:
     needs: backend_deploy
     defaults:
       run:
-        working-directory: ./feapp  # Only affects this job
+        working-directory: ./feapp
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'  # Only run on push to main
     steps:
@@ -164,8 +164,9 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           cache: 'npm'
+          cache-dependency-path: ./feapp/package-lock.json  # Cache only feapp dependencies
 
       - name: Configure AWS Credentials for GitHub Actions
         uses: aws-actions/configure-aws-credentials@v4.0.2
