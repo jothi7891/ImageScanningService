@@ -96,7 +96,7 @@ jobs:
           cd lambda_package
 
           # Install dependencies in the Lambda package folder
-          pip install -r ../requirements.txt -t .
+          pip install -r ../beapp/requirements.txt -t .
 
           # Zip the first Lambda function (image_requests.py)
           zip -r ../image_requests.zip ../beapp/image_requests.py ../beapp/models.py * 
