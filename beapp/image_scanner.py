@@ -10,14 +10,6 @@ from pynamodb.exceptions import DoesNotExist
 from models.request_tracker import RequestTracker
 from models.image_details import ImageDetail
 
-# Logging configuration
-logger = logging.getLogger(__name__)
-
-logging.basicConfig(level=logging.INFO,
-                    format="%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s",
-                    handlers=[
-                        logging.StreamHandler(sys.stdout)
-                    ])
 
 # Initialize Rekognition client
 rekognition = boto3.client('rekognition')
@@ -37,8 +29,14 @@ def lambda_handler(event, context):
             file_type = file_key.split('.')[1]
             image_size = record['s3']['object']['size']
 
-            # Query using PynamoDB model (ImageDetail)
-            existing_item = ImageDetail.get(image_hash)
+            try:
+
+                # Query using PynamoDB model (ImageDetail)
+                existing_item = ImageDetail.get(image_hash)
+                            
+            except DoesNotExist:
+                
+                existing_item = None
 
             if existing_item:
                 logging.info(f"Image with hash {image_hash} already exists in DynamoDB. Skipping processing.")
@@ -69,7 +67,7 @@ def update_image_metadata_with_labels(image_hash: str, labels: dict, status: str
         image_detail.update(actions=[
             ImageDetail.labels.set(labels),
             ImageDetail.image_status.set(status),
-            ImageDetail.image_processing_completed.set(datetime.now().isoformat())
+            ImageDetail.image_processing_complete_time.set(datetime.now().isoformat())
         ])
 
         logging.info(f"Image metadata for {image_hash} updated.")
@@ -105,7 +103,8 @@ def update_request_status_with_matching_labels(request_id: str, status: str, lab
         request_item.update(actions=[
             RequestTracker.label_matched.set(label_match),
             RequestTracker.image_status.set(status),
-            RequestTracker.request_status.set(status)
+            RequestTracker.request_status.set(status),
+            RequestTracker.request_complete_time.set(datetime.now().isoformat())
         ])
 
         logging.info(f"Request {request_id} status updated based on label match.")
@@ -154,3 +153,7 @@ def create_image_metadata(image_hash: str, file_type: str, image_size: int):
     except Exception as e:
         logging.exception(f"Error storing {item} in DynamoDB: {e}")
         return None
+
+if __name__ == '__main__':
+    event = {'Records':[{'eventVersion': '2.1', 'eventSource': 'aws:s3', 'awsRegion': 'us-east-1', 'eventTime': '2025-04-10T14:06:07.978Z', 'eventName': 'ObjectCreated:Put', 'userIdentity': {'principalId': 'AWS:AROAUH4XHVINNITUNNNOL:image_uploader'}, 'requestParameters': {'sourceIPAddress': '107.21.199.50'}, 'responseElements': {'x-amz-request-id': 'D6M00Z8HY7TMY1D9', 'x-amz-id-2': 'Sw1Ax2LK2Q92kwYySiuRHnquS5+t37i84TvD/lrHhGPXtKisE50GuRvO9XxQlxkR/MtHZzpOX7dtM5mn04ImshUExVXzCylq'}, 's3': {'s3SchemaVersion': '1.0', 'configurationId': 'a25b9005-4584-4f66-a51e-d05e4131b71f', 'bucket': {'name': 'jothi-image-test-bucket-2', 'ownerIdentity': {'principalId': 'A25NFHTB21CF2B'}, 'arn': 'arn:aws:s3:::jothi-image-test-bucket-2'}, 'object': {'key': '8a56ccfc341865af4ec1c2d836e52e71dcd959e41a8522f60bfcc3ff4e99d388.jpg', 'size': 107329, 'eTag': '26e16131d4778382634bbde8c0024b40', 'versionId': 'PxXcRsrIQiAiooihhC4sQQCytbPbGATp', 'sequencer': '0067F7D04FEADC629A'}}}]}
+    lambda_handler(event, None)

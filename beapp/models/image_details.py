@@ -1,7 +1,7 @@
 import os
 
 from pynamodb.models import Model
-from pynamodb.attributes import UnicodeAttribute, ListAttribute, BooleanAttribute
+from pynamodb.attributes import UnicodeAttribute, ListAttribute, BooleanAttribute, MapAttribute
 
 
 # Define the ImageDetail model for image metadata
@@ -13,5 +13,6 @@ class ImageDetail(Model):
     image_status = UnicodeAttribute()
     file_type = UnicodeAttribute()
     image_upload_time = UnicodeAttribute()
-    labels = ListAttribute(of=UnicodeAttribute, default=list)  # Storing labels as a list of strings
-    image_processing_completed = UnicodeAttribute(null=True)
+    labels = ListAttribute(of=MapAttribute, default=list)  # Storing labels as a list of dicts
+    image_processing_complete_time= UnicodeAttribute(null=True)
+

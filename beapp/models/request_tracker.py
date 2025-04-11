@@ -21,7 +21,8 @@ class RequestTracker(Model):
         table_name = os.environ['REQUEST_TRACKER_TABLE']
 
     request_id = UnicodeAttribute(hash_key=True)
-    request_time = UnicodeAttribute()
+    request_start_time = UnicodeAttribute()
+    request_complete_time = UnicodeAttribute()
     image_hash = UnicodeAttribute()
     request_status = UnicodeAttribute()
     label_matched = BooleanAttribute(null=True)
