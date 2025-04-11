@@ -137,12 +137,11 @@ resource "aws_iam_role" "lambda_exec" {
       }
     },
     {
-      "Sid": "api-gateway",
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "apigateway.amazonaws.com"
+      Effect = "Allow",
+      Principal = {
+        Service = "apigateway.amazonaws.com"
       },
-      "Action": "lambda:InvokeFunction"
+      Action = "lambda:InvokeFunction"
     }
     ]
   })
