@@ -41,9 +41,14 @@ class RequestTracker(Model):
 
     def to_power_user(self):
 
-        debug_data = self.attribute_values
+        debug_data = {
+            'request_details': self.attribute_values
+        }
         try:
-            debug_data.update(ImageDetail.get(self.image_hash))
+            image_item = ImageDetail.get(self.image_hash)
+
+            if image_item:
+                debug_data['image_details'] = image_item.attribute_values
         except:
             pass
         return {
