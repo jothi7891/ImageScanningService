@@ -143,7 +143,7 @@ resource "aws_iam_role" "lambda_exec" {
         "Service": "apigateway.amazonaws.com"
       },
       "Action": "lambda:InvokeFunction",
-      "Resource": aws_lambda_function.image_requests.arn
+      "Resource": "*"
     }
     ]
   })
