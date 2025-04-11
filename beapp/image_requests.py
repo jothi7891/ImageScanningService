@@ -65,8 +65,12 @@ def scan_requests_post_method_handler(event: dict, context) -> dict:
                     'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
                 },
-                'body': json.dumps('Invalid file type. Only JPEG and PNG are allowed.')
-            }
+                'body': json.dumps(
+                    {
+                        'message': f'Invalid file type. Only JPEG and PNG are allowed.',
+                        'status': "Validation Failed"
+                    })
+                }
 
         # Calculate the SHA-256 of the image file to create a unique key
         # Check if the hash exists in the DynamoDB table which means the same image has been uploaded and can give the results without calling the recognition service, hence saving cost
@@ -74,7 +78,7 @@ def scan_requests_post_method_handler(event: dict, context) -> dict:
         image_hash = sha256_of_image(image_content)
 
         # Create a job in the request tracker table with pending status
-        create_job_with_status(str(uuid.uuid4()), image_hash, 'pending', request_label)
+        request_id = create_job_with_status(str(uuid.uuid4()), image_hash, 'pending', request_label)
 
         # Store the image in S3
         store_image_in_s3(f"{image_hash}.{file_extensions[file_type]}", image_content, file_type)
@@ -86,7 +90,11 @@ def scan_requests_post_method_handler(event: dict, context) -> dict:
                     'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
                 },
-                'body': json.dumps('Hang Tight. We will process your image as soon as we can.')
+                'body': json.dumps({
+                    'message': f'Here is the request id - {request_id}. We will process your image as soon as we can',
+                    'status': 'Processing'
+                }
+                    )
             }
     
     except Exception as e:
@@ -98,7 +106,12 @@ def scan_requests_post_method_handler(event: dict, context) -> dict:
                     'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
                 },
-            'body': json.dumps(f'Error processing the Image: {str(e)}')
+            'body': json.dumps(
+                {
+                'message': f'Error processing the Image: {str(e)}',
+                'status': 'Failed'
+                }
+        )
         }
 
 
@@ -161,7 +174,10 @@ def scan_requests_id_get_method_handler(event: dict, context) -> dict:
                         'Access-Control-Allow-Origin': '*',
                         'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
                     },
-                    'body': json.dumps(f"{request_id} is invalid. Please check and try and again later")
+                    'body': json.dumps({
+                        'request_id': request_id,
+                        'message': f"{request_id} is invalid. Please check and try and again later"
+                        })
                 }
 
         except Exception as e:
@@ -177,7 +193,10 @@ def scan_requests_id_get_method_handler(event: dict, context) -> dict:
                     'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
                 },
-            'body': json.dumps(f'Error processing the Image: {str(e)}')
+                    'body': json.dumps({
+                        'request_id': request_id,
+                        'message': f'Error processing the Image: {str(e)})'
+                    })
         }
 
 
@@ -209,6 +228,8 @@ def create_job_with_status(request_id: str, image_hash: str, status: str, reques
         )
         logging.info(f"Creating Job with details - {item}")
         item.save()
+        return item.request_id
+    
     except ClientError as e:
         raise Exception(f"Error storing {item} in DynamoDB: {str(e)}")
 

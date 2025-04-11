@@ -36,7 +36,8 @@ class RequestTracker(Model):
     def to_normal_user(self):
         return {
             'request_id': self.request_id,
-            f"contains{str(self.labels).title()}": self.label_matched
+            'label': self.labels,
+            'label_matched': self.label_matched
         }
 
     def to_power_user(self):
@@ -53,6 +54,7 @@ class RequestTracker(Model):
             pass
         return {
             'request_id': self.request_id,
-            f"contains{str(self.labels).title()}": self.label_matched,
+            'label': self.labels,
+            'label_matched': self.label_matched,
             'debug_data': debug_data
         }
