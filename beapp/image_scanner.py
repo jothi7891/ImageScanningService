@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import sys
 from datetime import datetime
 
 import boto3
@@ -10,10 +11,13 @@ from models.request_tracker import RequestTracker
 from models.image_details import ImageDetail
 
 # Logging configuration
+logger = logging.getLogger(__name__)
+
 logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s",
-                    handlers=[logging.StreamHandler()])
-logger = logging.getLogger(__name__)
+                    handlers=[
+                        logging.StreamHandler(sys.stdout)
+                    ])
 
 # Initialize Rekognition client
 rekognition = boto3.client('rekognition')

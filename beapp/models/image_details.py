@@ -1,15 +1,8 @@
-import logging
 import os
 
 from pynamodb.models import Model
 from pynamodb.attributes import UnicodeAttribute, ListAttribute, BooleanAttribute
-from pynamodb.indexes import GlobalSecondaryIndex, AllProjection
 
-# Logging configuration
-logging.basicConfig(level=logging.INFO,
-                    format="%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s",
-                    handlers=[logging.StreamHandler()])
-logger = logging.getLogger(__name__)
 
 # Define the ImageDetail model for image metadata
 class ImageDetail(Model):

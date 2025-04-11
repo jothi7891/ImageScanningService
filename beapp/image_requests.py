@@ -17,10 +17,13 @@ image_store = os.environ['IMAGE_STORAGE_BUCKET']  # S3 bucket name
 s3 = boto3.client('s3')
 
 # Logging configuration
+logger = logging.getLogger(__name__)
+
 logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s",
-                    handlers=[logging.StreamHandler()])
-logger = logging.getLogger(__name__)
+                    handlers=[
+                        logging.StreamHandler(sys.stdout)
+                    ])
 
 def scan_requests_post_method_handler(event: dict, context) -> dict:
     file_extensions = {
@@ -165,7 +168,7 @@ def create_job_with_status(request_id: str, image_hash: str, status: str, reques
             request_status=status,
             image_status='pending',
             image_hash=image_hash,
-            labels=[request_label],
+            labels=request_label,
             label_matched=False
         )
         logging.info(f"Creating Job with details - {item}")
