@@ -136,13 +136,20 @@ resource "aws_iam_role" "lambda_exec" {
         Service = "lambda.amazonaws.com"
       }
     },
-      {
-        Action    = "sts:AssumeRole",
-        Effect    = "Allow",
-        Principal = {
-          Service = "apigateway.amazonaws.com"  
+    {
+      "Sid": "api-gateway",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "apigateway.amazonaws.com"
+      },
+      "Action": "lambda:InvokeFunction",
+      "Resource": "arn:aws:lambda:us-east-1:291838077466:function:image_requests",
+      "Condition": {
+        "ArnLike": {
+          "AWS:SourceArn": "arn:aws:execute-api:us-east-1:291838077466:nf0wjsdmx5/*"
         }
       }
+    }
     ]
   })
 }
@@ -165,11 +172,6 @@ resource "aws_iam_role_policy_attachment" "lambda_rekognition" {
 resource "aws_iam_role_policy_attachment" "lambda_logs" {
   role       = aws_iam_role.lambda_exec.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-}
-
-resource "aws_iam_role_policy_attachment" "lambda_api_gateway" {
-  role       = aws_iam_role.lambda_exec.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayInvokeLambdaFunction" 
 }
 
 #Lambda for handling 
