@@ -174,6 +174,8 @@ resource "aws_lambda_function" "image_requests" {
     variables = {
       REQUEST_TRACKER_TABLE = var.requests_tracker_table
       IMAGE_STORAGE_BUCKET = var.image_bucket_name
+      IMAGE_DETAIL_TABLE = var.image_results_table
+      REQUEST_TRACKER_IMAGE_INDEX = var.requests_tracker_index
     }
   }
 }

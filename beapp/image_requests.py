@@ -9,7 +9,7 @@ import uuid
 from datetime import datetime
 
 import boto3
-from pynamodb.exceptions import ClientError
+from botocore.exceptions import ClientError
 
 from models.request_tracker import RequestTracker
 
