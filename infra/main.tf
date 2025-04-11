@@ -234,61 +234,61 @@ resource "aws_api_gateway_resource" "images" {
   path_part   = "scanrequest"
 }
 
-# Create an OPTIONS method for CORS preflight
-resource "aws_api_gateway_method" "images_options" {
-  rest_api_id   = aws_api_gateway_rest_api.image_scan_api.id
-  resource_id   = aws_api_gateway_resource.images.id
-  http_method   = "OPTIONS"
-  authorization = "NONE"
-}
+# # Create an OPTIONS method for CORS preflight
+# resource "aws_api_gateway_method" "images_options" {
+#   rest_api_id   = aws_api_gateway_rest_api.image_scan_api.id
+#   resource_id   = aws_api_gateway_resource.images.id
+#   http_method   = "OPTIONS"
+#   authorization = "NONE"
+# }
 
-# Setup OPTIONS method response to allow CORS headers
-resource "aws_api_gateway_method_response" "options_method_response" {
-  rest_api_id = aws_api_gateway_rest_api.image_scan_api.id
-  resource_id = aws_api_gateway_resource.images.id
-  http_method = aws_api_gateway_method.images_options.http_method
-  status_code = 200
+# # Setup OPTIONS method response to allow CORS headers
+# resource "aws_api_gateway_method_response" "options_method_response" {
+#   rest_api_id = aws_api_gateway_rest_api.image_scan_api.id
+#   resource_id = aws_api_gateway_resource.images.id
+#   http_method = aws_api_gateway_method.images_options.http_method
+#   status_code = 200
 
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin"      = true
-    "method.response.header.Access-Control-Allow-Headers"     = true
-    "method.response.header.Access-Control-Allow-Methods"     = true
-    "method.response.header.Access-Control-Allow-Credentials" = true
-  }
-}
+#   response_parameters = {
+#     "method.response.header.Access-Control-Allow-Origin"      = true
+#     "method.response.header.Access-Control-Allow-Headers"     = true
+#     "method.response.header.Access-Control-Allow-Methods"     = true
+#     "method.response.header.Access-Control-Allow-Credentials" = true
+#   }
+# }
 
 
-# Setup the OPTIONS method integration (Mock Integration for CORS)
-resource "aws_api_gateway_integration" "images_options_integration" {
-  rest_api_id = aws_api_gateway_rest_api.image_scan_api.id
-  resource_id = aws_api_gateway_resource.images.id
-  http_method = aws_api_gateway_method.images_options.http_method
-  integration_http_method = "POST"
-  type                    = "MOCK"
+# # Setup the OPTIONS method integration (Mock Integration for CORS)
+# resource "aws_api_gateway_integration" "images_options_integration" {
+#   rest_api_id = aws_api_gateway_rest_api.image_scan_api.id
+#   resource_id = aws_api_gateway_resource.images.id
+#   http_method = aws_api_gateway_method.images_options.http_method
+#   integration_http_method = "POST"
+#   type                    = "MOCK"
 
-  request_templates = {
-    "application/json" = <<-EOF
-      {
-        "statusCode": 200
-      }
-    EOF
-  }
+#   request_templates = {
+#     "application/json" = <<-EOF
+#       {
+#         "statusCode": 200
+#       }
+#     EOF
+#   }
 
-}
+# }
 
-# OPTIONS Integration Response
-resource "aws_api_gateway_integration_response" "images_options_integration" {
-  rest_api_id = aws_api_gateway_rest_api.image_scan_api.id
-  resource_id = aws_api_gateway_resource.images.id
-  http_method = aws_api_gateway_method.images_options.http_method
-  status_code = aws_api_gateway_method_response.options_method_response.status_code
+# # OPTIONS Integration Response
+# resource "aws_api_gateway_integration_response" "images_options_integration" {
+#   rest_api_id = aws_api_gateway_rest_api.image_scan_api.id
+#   resource_id = aws_api_gateway_resource.images.id
+#   http_method = aws_api_gateway_method.images_options.http_method
+#   status_code = aws_api_gateway_method_response.options_method_response.status_code
 
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin"  = "'*'",
-    "method.response.header.Access-Control-Allow-Methods" = "'POST,OPTIONS'",
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
-  }
-}
+#   response_parameters = {
+#     "method.response.header.Access-Control-Allow-Origin"  = "'*'",
+#     "method.response.header.Access-Control-Allow-Methods" = "'POST,OPTIONS'",
+#     "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
+#   }
+# }
 
 resource "aws_api_gateway_method" "images_post" {
   rest_api_id   = aws_api_gateway_rest_api.image_scan_api.id
@@ -309,25 +309,25 @@ resource "aws_api_gateway_integration" "image_upload_lambda_integration" {
 
 }
 
-resource "aws_api_gateway_gateway_response" "images_cors_4xx" {
-  rest_api_id   = aws_api_gateway_rest_api.image_scan_api.id
-  response_type = "DEFAULT_4XX"
+# resource "aws_api_gateway_gateway_response" "images_cors_4xx" {
+#   rest_api_id   = aws_api_gateway_rest_api.image_scan_api.id
+#   response_type = "DEFAULT_4XX"
   
-  response_parameters = {
-    "gatewayresponse.header.Access-Control-Allow-Origin"  = "'*'",
-    "gatewayresponse.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization'"
-  }
-}
+#   response_parameters = {
+#     "gatewayresponse.header.Access-Control-Allow-Origin"  = "'*'",
+#     "gatewayresponse.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization'"
+#   }
+# }
 
-resource "aws_api_gateway_gateway_response" "images_cors_5xx" {
-  rest_api_id   = aws_api_gateway_rest_api.image_scan_api.id
-  response_type = "DEFAULT_5XX"
+# resource "aws_api_gateway_gateway_response" "images_cors_5xx" {
+#   rest_api_id   = aws_api_gateway_rest_api.image_scan_api.id
+#   response_type = "DEFAULT_5XX"
   
-  response_parameters = {
-    "gatewayresponse.header.Access-Control-Allow-Origin"  = "'*'",
-    "gatewayresponse.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization'"
-  }
-}
+#   response_parameters = {
+#     "gatewayresponse.header.Access-Control-Allow-Origin"  = "'*'",
+#     "gatewayresponse.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization'"
+#   }
+# }
 
 
 resource "aws_api_gateway_deployment" "image_api_deployment" {
