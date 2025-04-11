@@ -1,5 +1,5 @@
 output "fe_deploy_bucket_name" {
-  value = aws_s3_bucket.front_end_deploy_bucket.bucket
+  value = var.front_end_deploy_bucket_name
 }
 
 output "api_gateway_url" {
