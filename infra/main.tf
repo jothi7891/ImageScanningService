@@ -142,8 +142,7 @@ resource "aws_iam_role" "lambda_exec" {
       "Principal": {
         "Service": "apigateway.amazonaws.com"
       },
-      "Action": "lambda:InvokeFunction",
-      "Resource": "*"
+      "Action": "lambda:InvokeFunction"
     }
     ]
   })
