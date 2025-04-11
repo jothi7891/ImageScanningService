@@ -93,7 +93,6 @@ jobs:
         run: |
           # Create a directory for the Lambda package and copy the Python files and dependencies
           mkdir -p lambda_package
-          cp -r * lambda_package/
           cd lambda_package
 
           # Install dependencies in the Lambda package folder
