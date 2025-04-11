@@ -367,7 +367,7 @@ resource "aws_api_gateway_deployment" "image_api_deployment" {
     redeployment = sha1(jsonencode([
       aws_api_gateway_resource.images.id,
       aws_api_gateway_method.images_post.id,
-      aws_api_gateway_method.images_idpath.id,
+      aws_api_gateway_method.images_idpath_get.id,
       aws_api_gateway_method.images_options.id,
       aws_api_gateway_integration.images_options_integration.id,
       aws_api_gateway_integration_response.images_options_integration.id,
