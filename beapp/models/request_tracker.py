@@ -37,10 +37,13 @@ class RequestTracker(Model):
         return {
             'request_id': self.request_id,
             'label': self.labels,
-            'label_matched': self.label_matched
+            'label_matched': self.label_matched,
+            'status': self.request_status
         }
 
     def to_power_user(self):
+        
+        output = self.to_normal_user()
 
         debug_data = {
             'request_details': self.attribute_values
@@ -52,9 +55,5 @@ class RequestTracker(Model):
                 debug_data['image_details'] = image_item.attribute_values
         except:
             pass
-        return {
-            'request_id': self.request_id,
-            'label': self.labels,
-            'label_matched': self.label_matched,
-            'debug_data': debug_data
-        }
+        output['debug_data'] = debug_data
+        return output

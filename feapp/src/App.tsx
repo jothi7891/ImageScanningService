@@ -5,16 +5,18 @@ import './App.css'
 
 // Define types for the response
 interface ScanResult {
-  containsCat: boolean;
-  message: string;
-  status: string;
-  jobId: string;
+  request_id: string;
+  label: string;
+  label_matched: boolean;
+  debug_data?: string;
+  message?: string;
+  status?: string;
 }
 
 const App: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
-  const [jobId, setJobId] = useState<string>(''); // Store Job ID input
+  const [requestId, setRequestId] = useState("");
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [isCheckingStatus, setIsCheckingStatus] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -52,10 +54,10 @@ const App: React.FC = () => {
         const response = await axios.post(`${process.env.REACT_APP_BACKEND_API_URL}/scanrequest`, payload, {
         });
 
-        // Assuming the backend returns a jobId and status message
-        const { jobId, message } = response.data;
-        setJobId(jobId); // Display job ID to the user
-        setScanResult({ jobId, containsCat: false, message, status: 'Processing' });
+        // Assuming the backend returns a requestId and status message
+        const { message, status } = response.data;
+
+        setScanResult({message: message, status: status });
       } catch (error) {
         console.error("Error uploading the image:", error);
         setErrorMessage("Failed to upload image. Please try again.");
@@ -69,7 +71,7 @@ const App: React.FC = () => {
 
   // Check status of the image processing based on Job ID
   const checkStatus = async () => {
-    if (!jobId) {
+    if (!requestId) {
       setErrorMessage("Please enter a valid Job ID.");
       return;
     }
@@ -79,12 +81,12 @@ const App: React.FC = () => {
 
     try {
       // Replace with your API Gateway URL for checking status
-      const apiUrl = `${process.env.REACT_APP_BACKEND_API_URL}/${jobId}`; 
+      const apiUrl = `${process.env.REACT_APP_BACKEND_API_URL}/${requestId}`; 
       const response = await axios.get(apiUrl);
 
       const { containsCat, message } = response.data;
       setScanResult({
-        jobId,
+        requestId,
         containsCat,
         message,
         status: 'Completed',
@@ -109,7 +111,7 @@ const App: React.FC = () => {
         style={{ display: 'none' }} // Hide the file input
       />
       <label htmlFor="image-upload" className="label-upload">
-        {selectedImage ? 'Upload Image' : 'Choose Image'}
+        'Choose Image'
       </label>
 
       {/* Display the selected file information */}
@@ -146,7 +148,7 @@ const App: React.FC = () => {
             </button>
           )}
           {scanResult.status === 'Completed' && (
-            <p>{scanResult.containsCat ? 'This image contains a cat!' : 'No cat detected in this image.'}</p>
+            <p>{scanResult.label_matched ? 'This image contains a `${scanResult.labels}`' : 'No `${scanResult.labels}` detected in this image.'}</p>
           )}
         </div>
       )}
@@ -156,8 +158,8 @@ const App: React.FC = () => {
         <h2>Check Image Status by Job ID</h2>
         <input
           type="text"
-          value={jobId}
-          onChange={(e) => setJobId(e.target.value)}
+          value={requestId}
+          onChange={(e) => setrequestId(e.target.value)}
           placeholder="Enter Job ID"
           className="job-id-input"
         />
@@ -167,9 +169,9 @@ const App: React.FC = () => {
       </div>
 
       {/* Display Job ID after successful upload */}
-      {jobId && !scanResult && !isUploading && (
+      {requestId && !scanResult && !isUploading && (
         <div className="job-id-display">
-          <p>Your Job ID: <strong>{jobId}</strong></p>
+          <p>Your Job ID: <strong>{requestId}</strong></p>
           <p>You can now check the status of your image processing using this Job ID.</p>
         </div>
       )}
