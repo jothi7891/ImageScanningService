@@ -105,7 +105,7 @@ jobs:
           cp ../beapp/image_requests.py .
           # Zip the first Lambda function (image_requests.py)
           zip -r ../image_requests.zip * 
-          rm ../beapp/image_requests.py .
+          rm ../beapp/image_requests.py
 
           cp ../beapp/image_scanner.py .
           # Now zip the second Lambda function (image_scanner.py)
