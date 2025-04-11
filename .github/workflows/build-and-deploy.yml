@@ -152,6 +152,9 @@ jobs:
 
   deploy_fe:
     needs: backend_deploy
+    defaults:
+      run:
+        working-directory: ./feapp  # Only affects this job
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'  # Only run on push to main
     steps:
@@ -178,10 +181,8 @@ jobs:
 
       - name: Build FE
         run: |
-          cd feapp
           npm run build
 
       - name: Upload to S3
         run: |
-          cd feapp
           aws s3 sync ./build s3://jothi-image-scanner-fe-app --delete
