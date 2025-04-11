@@ -156,7 +156,7 @@ def create_job_with_status(request_id: str, image_hash: str, status: str, reques
     try:
         item = RequestTracker(
             request_id=request_id,
-            request_time=datetime.now().isoformat(),
+            request_start_time=datetime.now().isoformat(),
             request_status=status,
             image_status='pending',
             image_hash=image_hash,
