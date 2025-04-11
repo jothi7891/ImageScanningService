@@ -143,12 +143,7 @@ resource "aws_iam_role" "lambda_exec" {
         "Service": "apigateway.amazonaws.com"
       },
       "Action": "lambda:InvokeFunction",
-      "Resource": "arn:aws:lambda:us-east-1:291838077466:function:image_requests",
-      "Condition": {
-        "ArnLike": {
-          "AWS:SourceArn": "arn:aws:execute-api:us-east-1:291838077466:nf0wjsdmx5/*"
-        }
-      }
+      "Resource": aws_lambda_function.image_requests.arn
     }
     ]
   })
