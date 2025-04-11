@@ -1,4 +1,4 @@
-name: CI/CD Pipeline for Lambda Deployment
+name: CI/CD Pipeline for Image service
 
 env:
   AWS_REGION: 'us-east-1'
@@ -36,7 +36,7 @@ jobs:
       #   run: |
       #     pytest tests/
 
-  terraform_plan:
+  deploy_plan:
     needs: build_and_test
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'  # Only run on PRs targeting main branch
@@ -71,7 +71,7 @@ jobs:
           cd infra
           terraform plan
 
-  terraform_apply:
+  deploy_apply:
     needs: build_and_test
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'  # Only run on push to main

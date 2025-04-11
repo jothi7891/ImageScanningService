@@ -10,6 +10,7 @@ from datetime import datetime
 
 import boto3
 from botocore.exceptions import ClientError
+from pynamodb.exceptions import DoesNotExist
 
 from models.request_tracker import RequestTracker
 
@@ -29,6 +30,17 @@ logging.basicConfig(level=logging.INFO,
                         logging.StreamHandler(sys.stdout)
                     ])
 
+def lambda_handler(event: dict, context)-> dict:
+    logging.info(f"Received event - {event}")
+
+    path = event.get('path')
+    http_method = event.get('httpMethod')
+
+    if path == '/scanrequest' and http_method == 'POST':
+
+        return scan_requests_post_method_handler(event, context)
+    elif '/scanrequest/' in path and http_method == 'GET':
+        return scan_requests_id_get_method_handler(event, context)
 
 def scan_requests_post_method_handler(event: dict, context) -> dict:
     file_extensions = {
@@ -36,7 +48,7 @@ def scan_requests_post_method_handler(event: dict, context) -> dict:
         "image/png": "png"
             }
     try:
-        logging.info(f"Received image upload request - {event}")
+        logging.info(f"Received image upload request")
         # Extract file details from event
         body = json.loads(event.get('body', ''))
         file_data = body.get('file', None)
@@ -91,52 +103,63 @@ def scan_requests_post_method_handler(event: dict, context) -> dict:
 
 
 def scan_requests_id_get_method_handler(event: dict, context) -> dict:
+
     file_extensions = {
         "image/jpeg": "jpg",
         "image/png": "png"
             }
+    
+    debug_data = event.get('queryStringParameters', {}).get('debugData', None)
+
     try:
-        logging.info(f"Received image upload request - {event}")
+        logging.info(f"Received image status request - {event}")
         # Extract file details from event
         body = json.loads(event.get('body', ''))
-        file_data = body.get('file', None)
-        file_type = body.get('fileType', None)
-        request_label = body.get('label', 'cat')
+        request_id = body.get('requestId', None)
+        # valid if its a valid request id 
+        try:
+    
+            request_details = RequestTracker.get(request_id)
 
-        # Validate file type
-        if file_type not in ['image/jpeg', 'image/png']:
-            logging.error(f"{file_type} is not supported")
-            return {
-                'statusCode': 400,
-                'headers': {
-                    'Access-Control-Allow-Headers': 'Content-Type',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-                },
-                'body': json.dumps('Invalid file type. Only JPEG and PNG are allowed.')
-            }
-
-        # Calculate the SHA-256 of the image file to create a unique key
-        # Check if the hash exists in the DynamoDB table which means the same image has been uploaded and can give the results without calling the recognition service, hence saving cost
-        image_content = base64.b64decode(file_data)
-        image_hash = sha256_of_image(image_content)
-
-        # Create a job in the request tracker table with pending status
-        create_job_with_status(str(uuid.uuid4()), image_hash, 'pending', request_label)
-
-        # Store the image in S3
-        store_image_in_s3(f"{image_hash}.{file_extensions[file_type]}", image_content, file_type)
-
-        return {
+            if debug_data:
+                return {
                 'statusCode': 200,
                 'headers': {
                     'Access-Control-Allow-Headers': 'Content-Type',
                     'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
                 },
-                'body': json.dumps('Hang Tight. We will process your image as soon as we can.')
-            }
-    
+                body: json.dumps(request_details.to_power_user())
+                }
+            else:
+                return {
+                    'statusCode': 200,
+                    'headers': {
+                        'Access-Control-Allow-Headers': 'Content-Type',
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    },
+                    body: json.dumps(request_details.to_normal_user())
+                }
+        
+        except DoesNotExist:
+
+            logging.error(f"Request {request_id} does not exist")
+
+            return {
+                    'statusCode': 404,
+                    'headers': {
+                        'Access-Control-Allow-Headers': 'Content-Type',
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    },
+                    'body': json.dumps(f"{request_id} is invalid. Please check and try and again later")
+                }
+
+        except Exception as e:
+            logging.exception(f" Exception {e} during processing of the request {request_id}")
+            raise e
+
     except Exception as e:
         logging.exception(f"Exception {e} during processing the event - {event}")
         return {

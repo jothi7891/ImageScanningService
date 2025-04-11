@@ -227,6 +227,12 @@ resource "aws_api_gateway_resource" "images" {
   path_part   = "scanrequest"
 }
 
+resource "aws_api_gateway_resource" "images_idpath" {
+  rest_api_id = aws_api_gateway_rest_api.image_scan_api.id
+  parent_id   = aws_api_gateway_resource.images.id
+  path_part   = "{request_id}"
+}
+
 # Create an OPTIONS method for CORS preflight
 resource "aws_api_gateway_method" "images_options" {
   rest_api_id   = aws_api_gateway_rest_api.image_scan_api.id
@@ -283,6 +289,7 @@ resource "aws_api_gateway_integration_response" "images_options_integration" {
   }
 }
 
+# POST method
 resource "aws_api_gateway_method" "images_post" {
   rest_api_id   = aws_api_gateway_rest_api.image_scan_api.id
   resource_id   = aws_api_gateway_resource.images.id
@@ -291,7 +298,21 @@ resource "aws_api_gateway_method" "images_post" {
 
 }
 
+# POST method
+resource "aws_api_gateway_method" "images_idpath_get" {
+  rest_api_id   = aws_api_gateway_rest_api.image_scan_api.id
+  resource_id   = aws_api_gateway_resource.images_idpath.id
+  http_method   = "GET"
+  authorization = "NONE"
 
+  # Declare the path parameter as required
+  request_parameters = {
+    "method.request.path.request_id" = true
+  }
+
+}
+
+# POST method lambda integration
 resource "aws_api_gateway_integration" "image_upload_lambda_integration" {
   rest_api_id             = aws_api_gateway_rest_api.image_scan_api.id
   resource_id             = aws_api_gateway_resource.images.id
@@ -299,6 +320,20 @@ resource "aws_api_gateway_integration" "image_upload_lambda_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = aws_lambda_function.image_requests.invoke_arn
+
+}
+
+# GET method lambda integration
+resource "aws_api_gateway_integration" "image_status_lambda_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.image_scan_api.id
+  resource_id             = aws_api_gateway_resource.images_idpath.id
+  http_method             = aws_api_gateway_method.images_idpath_get.http_method
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.image_requests.invoke_arn
+
+  request_parameters = {
+    "integration.request.path.request_id" = "method.request.path.request_id"
+  }
 
 }
 
@@ -332,10 +367,12 @@ resource "aws_api_gateway_deployment" "image_api_deployment" {
     redeployment = sha1(jsonencode([
       aws_api_gateway_resource.images.id,
       aws_api_gateway_method.images_post.id,
+      aws_api_gateway_method.images_idpath.id,
       aws_api_gateway_method.images_options.id,
       aws_api_gateway_integration.images_options_integration.id,
       aws_api_gateway_integration_response.images_options_integration.id,
-      aws_api_gateway_integration.image_upload_lambda_integration.id
+      aws_api_gateway_integration.image_upload_lambda_integration.id,
+      aws_api_gateway_integration.image_status_lambda_integration.id
     ]))
   }
 
