@@ -77,6 +77,15 @@ resource "aws_s3_bucket" "front_end_deploy_bucket" {
   }
 }
 
+resource "aws_s3_bucket_public_access_block" "public_access" {
+  bucket = aws_s3_bucket.front_end_deploy_bucket.id
+
+  block_public_acls       = false
+  ignore_public_acls      = false
+  block_public_policy     = false
+  restrict_public_buckets = false
+}
+
 resource "aws_s3_bucket_ownership_controls" "front_end_deploy_bucket" {
   bucket = aws_s3_bucket.front_end_deploy_bucket.id
   rule {
@@ -84,21 +93,8 @@ resource "aws_s3_bucket_ownership_controls" "front_end_deploy_bucket" {
   }
 }
 
-resource "aws_s3_bucket_acl" "front_end_deploy_bucket" {
-  depends_on = [aws_s3_bucket_ownership_controls.front_end_deploy_bucket]
-  bucket     = aws_s3_bucket.front_end_deploy_bucket.id
-  acl        = "private"
-}
-
-resource "aws_s3_bucket_versioning" "front_end_deploy_bucket" {
-  bucket = aws_s3_bucket.front_end_deploy_bucket.id
-  versioning_configuration {
-    status = "Enabled"
-  }
-}
-
-# Enable static website hosting
 resource "aws_s3_bucket_website_configuration" "front_end_deploy_bucket" {
+  depends_on = [aws_s3_bucket_public_access_block.public_access]
   bucket = aws_s3_bucket.front_end_deploy_bucket.id
 
   index_document {
@@ -110,8 +106,12 @@ resource "aws_s3_bucket_website_configuration" "front_end_deploy_bucket" {
   }
 }
 
-# Allow public read access to all objects
 resource "aws_s3_bucket_policy" "allow_public_read" {
+  depends_on = [
+    aws_s3_bucket_public_access_block.public_access,
+    aws_s3_bucket_ownership_controls.front_end_deploy_bucket
+  ]
+  
   bucket = aws_s3_bucket.front_end_deploy_bucket.id
   policy = jsonencode({
     Version = "2012-10-17"
@@ -127,21 +127,12 @@ resource "aws_s3_bucket_policy" "allow_public_read" {
   })
 }
 
-# Disable block public access (required for website hosting)
-resource "aws_s3_bucket_public_access_block" "public_access" {
+resource "aws_s3_bucket_versioning" "front_end_deploy_bucket" {
   bucket = aws_s3_bucket.front_end_deploy_bucket.id
-
-  block_public_acls       = false
-  ignore_public_acls      = false
-  block_public_policy     = false
-  restrict_public_buckets = false
+  versioning_configuration {
+    status = "Enabled"
+  }
 }
-
-# Output the website endpoint
-output "website_endpoint" {
-  value = aws_s3_bucket_website_configuration.front_end_deploy_bucket.website_endpoint
-}
-
 
 # dyanmo tables
 resource "aws_dynamodb_table" "image_results" {
