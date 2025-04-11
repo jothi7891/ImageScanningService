@@ -332,12 +332,7 @@ resource "aws_api_gateway_integration" "image_upload_lambda_integration" {
 resource "aws_api_gateway_deployment" "image_api_deployment" {
   depends_on = [
     aws_api_gateway_integration.image_upload_lambda_integration,
-    aws_api_gateway_method.images_options,
     aws_api_gateway_method.images_post,
-    aws_api_gateway_integration_response.images_options_integration,
-    aws_api_gateway_integration.images_options_integration,
-    aws_api_gateway_gateway_response.images_cors_4xx,
-    aws_api_gateway_gateway_response.images_cors_5xx
     ]
 
   rest_api_id = aws_api_gateway_rest_api.image_scan_api.id
