@@ -18,6 +18,20 @@ rekognition = boto3.client('rekognition')
 image_hash_index = os.environ['REQUEST_TRACKER_IMAGE_INDEX']
 bucket_name = os.environ['IMAGE_STORAGE_BUCKET']
 
+#Remove all handlers associated with the root logger object.
+
+for handler in logging.root.handlers[:]:
+    logging.root.removeHandler(handler)
+
+logger = logging.getLogger(__name__)
+
+logging.basicConfig(level=logging.INFO,
+                    format="%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s",
+                    handlers=[
+                        logging.StreamHandler(sys.stdout)
+                    ])
+
+
 def lambda_handler(event, context):
     try:
         for record in event['Records']:

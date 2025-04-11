@@ -16,6 +16,19 @@ from models.request_tracker import RequestTracker
 image_store = os.environ['IMAGE_STORAGE_BUCKET']  # S3 bucket name
 s3 = boto3.client('s3')
 
+#Remove all handlers associated with the root logger object.
+
+for handler in logging.root.handlers[:]:
+    logging.root.removeHandler(handler)
+
+logger = logging.getLogger(__name__)
+
+logging.basicConfig(level=logging.INFO,
+                    format="%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s",
+                    handlers=[
+                        logging.StreamHandler(sys.stdout)
+                    ])
+
 
 def scan_requests_post_method_handler(event: dict, context) -> dict:
     file_extensions = {
