@@ -108,18 +108,26 @@ def scan_requests_id_get_method_handler(event: dict, context) -> dict:
         "image/jpeg": "jpg",
         "image/png": "png"
             }
-    
-    debug_data = event.get('queryStringParameters', {}).get('debugData', None)
+
 
     try:
         logging.info(f"Received image status request - {event}")
         # Extract file details from event
-        body = json.loads(event.get('body', ''))
-        request_id = body.get('requestId', None)
+
+        request_id = event.get('pathParameters', None).get('request_id')
+
         # valid if its a valid request id 
         try:
     
             request_details = RequestTracker.get(request_id)
+
+            debug_data = None
+
+            query_string = event.get('queryStringParameters', {})
+            
+            if query_string:
+
+                debug_data = query_string.get('debugData', None)
 
             if debug_data:
                 return {
@@ -129,7 +137,7 @@ def scan_requests_id_get_method_handler(event: dict, context) -> dict:
                     'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
                 },
-                body: json.dumps(request_details.to_power_user())
+                'body': json.dumps(request_details.to_power_user())
                 }
             else:
                 return {
@@ -139,7 +147,7 @@ def scan_requests_id_get_method_handler(event: dict, context) -> dict:
                         'Access-Control-Allow-Origin': '*',
                         'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
                     },
-                    body: json.dumps(request_details.to_normal_user())
+                    'body': json.dumps(request_details.to_normal_user())
                 }
         
         except DoesNotExist:
