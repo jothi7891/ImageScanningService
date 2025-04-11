@@ -97,12 +97,16 @@ jobs:
 
           # Install dependencies in the Lambda package folder
           pip install -r ../beapp/requirements.txt -t .
+          
+          cp ../beapp/image_requests.py .
+          cp ../beapp/models.py .
+          cp ../beapp/image_scanner.py .
 
           # Zip the first Lambda function (image_requests.py)
-          zip -r ../image_requests.zip ../beapp/image_requests.py ../beapp/models.py * 
+          zip -r ../image_requests.zip image_requests.py models.py * 
 
           # Now zip the second Lambda function (image_scanner.py)
-          zip -r ../image_scanner.zip ../beapp/image_scanner.py ../beapp/models.py *
+          zip -r ../image_scanner.zip image_scanner.py models.py *
 
           cd ..
 
