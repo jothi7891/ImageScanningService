@@ -40,4 +40,3 @@ terraform.rc
 
 .terraform.lock.*
 .env
-.vscode

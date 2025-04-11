@@ -1,5 +1,6 @@
 # terraform/main.tf
 
+#provider 
 terraform {
   backend "s3" {
     bucket = "jothi-terraform-state"
@@ -8,6 +9,7 @@ terraform {
   }
 }
 
+# s3 buckets
 resource "aws_s3_bucket" "image_store_bucket" {
   bucket = var.image_bucket_name
 
@@ -66,6 +68,7 @@ resource "aws_s3_bucket_versioning" "lambda_deployment_bucket" {
   }
 }
 
+# dyanmo tables
 resource "aws_dynamodb_table" "image_results" {
   name         = var.image_results_table
   hash_key     = "image_hash"
@@ -145,6 +148,11 @@ resource "aws_iam_role_policy_attachment" "lambda_dynamo" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
 }
 
+resource "aws_iam_role_policy_attachment" "lambda_rekognition" {
+  role       = aws_iam_role.lambda_exec.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonRekognitionReadOnlyAccess"
+}
+
 resource "aws_iam_role_policy_attachment" "lambda_logs" {
   role       = aws_iam_role.lambda_exec.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
@@ -197,6 +205,8 @@ data "aws_s3_object" "image_scanner_zip" {
   key    = var.image_scanner_s3_key
 }
 
+
+# api gateeway
 resource "aws_api_gateway_rest_api" "image_scan_api" {
   name        = "ImageScan"
   description = "API for image scanning"
@@ -210,7 +220,7 @@ resource "aws_api_gateway_rest_api" "image_scan_api" {
 resource "aws_api_gateway_resource" "images" {
   rest_api_id = aws_api_gateway_rest_api.image_scan_api.id
   parent_id   = aws_api_gateway_rest_api.image_scan_api.root_resource_id
-  path_part   = "images"
+  path_part   = "scanrequest"
 }
 
 # Create an OPTIONS method for CORS preflight
@@ -255,6 +265,20 @@ resource "aws_api_gateway_integration" "images_options_integration" {
 
 }
 
+# OPTIONS Integration Response
+resource "aws_api_gateway_integration_response" "images_options_integration" {
+  rest_api_id = aws_api_gateway_rest_api.image_scan_api.id
+  resource_id = aws_api_gateway_resource.images.id
+  http_method = aws_api_gateway_method.images_options.http_method
+  status_code = aws_api_gateway_method_response.options_method_response.status_code
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin"  = "'*'",
+    "method.response.header.Access-Control-Allow-Methods" = "'POST,OPTIONS'",
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
+  }
+}
+
 resource "aws_api_gateway_method" "images_post" {
   rest_api_id   = aws_api_gateway_rest_api.image_scan_api.id
   resource_id   = aws_api_gateway_resource.images.id
@@ -274,15 +298,40 @@ resource "aws_api_gateway_integration" "image_upload_lambda_integration" {
 
 }
 
+resource "aws_api_gateway_gateway_response" "images_cors_4xx" {
+  rest_api_id   = aws_api_gateway_rest_api.image_scan_api.id
+  response_type = "DEFAULT_4XX"
+  
+  response_parameters = {
+    "gatewayresponse.header.Access-Control-Allow-Origin"  = "'*'",
+    "gatewayresponse.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization'"
+  }
+}
+
+resource "aws_api_gateway_gateway_response" "images_cors_5xx" {
+  rest_api_id   = aws_api_gateway_rest_api.image_scan_api.id
+  response_type = "DEFAULT_5XX"
+  
+  response_parameters = {
+    "gatewayresponse.header.Access-Control-Allow-Origin"  = "'*'",
+    "gatewayresponse.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization'"
+  }
+}
+
+
 resource "aws_api_gateway_deployment" "image_api_deployment" {
   depends_on = [
     aws_api_gateway_integration.image_upload_lambda_integration,
     aws_api_gateway_method.images_options,
-    aws_api_gateway_method.images_post
+    aws_api_gateway_method.images_post,
+    aws_api_gateway_integration_response.images_options_integration,
+    aws_api_gateway_integration.images_options_integration,
+    aws_api_gateway_gateway_response.images_cors_4xx,
+    aws_api_gateway_gateway_response.images_cors_5xx
     ]
+
   rest_api_id = aws_api_gateway_rest_api.image_scan_api.id
   stage_name  = "prod"
-
 
 }
 

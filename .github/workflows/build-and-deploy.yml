@@ -56,15 +56,20 @@ jobs:
           role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
 
       - name: Terraform Init
-        run: terraform init
+        run: |
+          cd infra
+          terraform init
 
       - name: Terraform Validate
         run: |
+          cd infra
           terraform fmt -recursive
           terraform validate
 
       - name: Terraform Plan
-        run: terraform plan
+        run: |
+          cd infra
+          terraform plan
 
   terraform_apply:
     needs: build_and_test
@@ -83,27 +88,47 @@ jobs:
           audience: sts.amazonaws.com
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
-
+  
       - name: Zip Lambda Code
         run: |
-          zip image_upload.zip image_upload.py
-          zip image_scanner.zip image_scanner.py
+          # Create a directory for the Lambda package and copy the Python files and dependencies
+          mkdir -p lambda_package
+          cp -r * lambda_package/
+          cd lambda_package
+
+          # Install dependencies in the Lambda package folder
+          pip install -r ../requirements.txt -t .
+
+          # Zip the first Lambda function (image_requests.py)
+          zip -r ../image_requests.zip ../beapp/image_requests.py ../beapp/models.py * 
+
+          # Now zip the second Lambda function (image_scanner.py)
+          zip -r ../image_scanner.zip ../beapp/image_scanner.py ../beapp/models.py *
+
+          cd ..
 
       - name: Upload to S3
         run: |
-          aws s3 cp image_upload.zip s3://jothi-lambda-deployments/image_upload.zip
+          aws s3 cp image_requests.zip s3://jothi-lambda-deployments/image_requests.zip
           aws s3 cp image_scanner.zip s3://jothi-lambda-deployments/image_scanner.zip
 
       - name: Terraform Init
-        run: terraform init
+        run: |
+          cd infra
+          terraform init
 
       - name: Terraform Validate
         run: |
+          cd infra
           terraform fmt -recursive
           terraform validate
 
       - name: Terraform Plan
-        run: terraform plan
+        run: |
+          cd infra
+          terraform plan
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve
+        run: |
+          cd infra
+          terraform apply -auto-approve
