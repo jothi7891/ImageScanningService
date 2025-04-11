@@ -49,7 +49,7 @@ const App: React.FC = () => {
 
       try {
         // Replace with your API Gateway URL for image upload
-        const response = await axios.post(`${process.env.REACT_APP_API_URL}/scanrequest`, payload, {
+        const response = await axios.post(`${process.env.REACT_APP_BACKEND_API_URL}/scanrequest`, payload, {
         });
 
         // Assuming the backend returns a jobId and status message
@@ -79,7 +79,7 @@ const App: React.FC = () => {
 
     try {
       // Replace with your API Gateway URL for checking status
-      const apiUrl = `https://your-api-gateway-url.com/status/${jobId}`; // Update this
+      const apiUrl = `${process.env.REACT_APP_BACKEND_API_URL}/${jobId}`; 
       const response = await axios.get(apiUrl);
 
       const { containsCat, message } = response.data;

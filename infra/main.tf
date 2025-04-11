@@ -159,14 +159,14 @@ resource "aws_iam_role_policy_attachment" "lambda_logs" {
 }
 
 #Lambda for handling 
-resource "aws_lambda_function" "image_upload" {
-  function_name = "image_uploader"
+resource "aws_lambda_function" "image_requests" {
+  function_name = "image_requests"
   s3_bucket     = aws_s3_bucket.lambda_deployment_bucket.id
-  s3_key        = "image_upload.zip"
+  s3_key        = "image_requests.zip"
   runtime       = "python3.12"
-  handler       = "image_upload.lambda_handler"
+  handler       = "image_requests.scan_requests_post_method_handler"
   role          = aws_iam_role.lambda_exec.arn
-  s3_object_version = data.aws_s3_object.image_upload_zip.version_id
+  s3_object_version = data.aws_s3_object.image_requests_zip.version_id
 
   environment {
     variables = {
@@ -176,9 +176,9 @@ resource "aws_lambda_function" "image_upload" {
   }
 }
 
-data "aws_s3_object" "image_upload_zip" {
+data "aws_s3_object" "image_requests_zip" {
   bucket = var.lambda_deployment_bucket_name
-  key    = var.image_uploader_s3_key
+  key    = var.image_requests_s3_key
 }
 
 resource "aws_lambda_function" "image_scanner_handler" {
@@ -294,7 +294,7 @@ resource "aws_api_gateway_integration" "image_upload_lambda_integration" {
   http_method             = aws_api_gateway_method.images_post.http_method
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
-  uri                     = aws_lambda_function.image_upload.invoke_arn
+  uri                     = aws_lambda_function.image_requests.invoke_arn
 
 }
 

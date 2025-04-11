@@ -28,9 +28,9 @@ variable "requests_tracker_index" {
  description = "User initiated requests table"
 }
 
-variable "image_uploader_s3_key" {
+variable "image_requests_s3_key" {
  type = string
- default = "image_upload.zip"
+ default = "image_requests.zip"
  description = "User initiated requests table"
 }
 
