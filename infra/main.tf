@@ -68,6 +68,35 @@ resource "aws_s3_bucket_versioning" "lambda_deployment_bucket" {
   }
 }
 
+resource "aws_s3_bucket" "front_end_deploy_bucket" {
+  bucket = var.front_end_deploy_bucket_name
+
+  tags = {
+    Environment = "dev"
+    Product = "image-scanner"
+  }
+}
+
+resource "aws_s3_bucket_ownership_controls" "front_end_deploy_bucket" {
+  bucket = aws_s3_bucket.front_end_deploy_bucket.id
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
+resource "aws_s3_bucket_acl" "front_end_deploy_bucket" {
+  depends_on = [aws_s3_bucket_ownership_controls.front_end_deploy_bucket]
+  bucket     = aws_s3_bucket.front_end_deploy_bucket.id
+  acl        = "private"
+}
+
+resource "aws_s3_bucket_versioning" "front_end_deploy_bucket" {
+  bucket = aws_s3_bucket.front_end_deploy_bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
 # dyanmo tables
 resource "aws_dynamodb_table" "image_results" {
   name         = var.image_results_table
@@ -170,7 +199,7 @@ resource "aws_lambda_function" "image_requests" {
   role          = aws_iam_role.lambda_exec.arn
   s3_object_version = data.aws_s3_object.image_requests_zip.version_id
   timeout = 30
-  
+
   environment {
     variables = {
       REQUEST_TRACKER_TABLE = var.requests_tracker_table
