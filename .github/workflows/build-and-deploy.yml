@@ -182,6 +182,7 @@ jobs:
 
       - name: Build FE
         run: |
+          echo "REACT_APP_BACKEND_API_URL=${{ needs.backend_deploy.outputs.api_gateway_url}} >> .env
           npm ci
           npm run build
 
