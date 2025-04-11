@@ -5,12 +5,18 @@ import './App.css'
 
 // Define types for the response
 interface ScanResult {
-  request_id: string;
+  requestId: string;
   label: string;
   label_matched: boolean;
   debug_data?: string;
-  message?: string;
+  message?: string,
   status?: string;
+}
+
+interface RequestResult {
+  requestId: string;
+  message: string;
+  status: string;
 }
 
 const App: React.FC = () => {
@@ -52,12 +58,11 @@ const App: React.FC = () => {
       try {
         // Replace with your API Gateway URL for image upload
         const response = await axios.post(`${process.env.REACT_APP_BACKEND_API_URL}/scanrequest`, payload, {
+
         });
 
-        // Assuming the backend returns a requestId and status message
-        const { message, status } = response.data;
-
-        setScanResult({message: message, status: status });
+        setRequestId(response.data.request_id);
+        
       } catch (error) {
         console.error("Error uploading the image:", error);
         setErrorMessage("Failed to upload image. Please try again.");
@@ -81,16 +86,9 @@ const App: React.FC = () => {
 
     try {
       // Replace with your API Gateway URL for checking status
-      const apiUrl = `${process.env.REACT_APP_BACKEND_API_URL}/${requestId}`; 
+      const apiUrl = `${process.env.REACT_APP_BACKEND_API_URL}/scanrequest/${requestId}`; 
       const response = await axios.get(apiUrl);
 
-      const { containsCat, message } = response.data;
-      setScanResult({
-        requestId,
-        containsCat,
-        message,
-        status: 'Completed',
-      });
     } catch (error) {
       console.error("Error checking status:", error);
       setErrorMessage("Failed to check status. Please try again.");
@@ -159,7 +157,7 @@ const App: React.FC = () => {
         <input
           type="text"
           value={requestId}
-          onChange={(e) => setrequestId(e.target.value)}
+          onChange={(e) => setRequestId(e.target.value)}
           placeholder="Enter Job ID"
           className="job-id-input"
         />

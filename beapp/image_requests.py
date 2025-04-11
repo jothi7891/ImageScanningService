@@ -58,7 +58,7 @@ def scan_requests_post_method_handler(event: dict, context) -> dict:
         # Validate file type
         if file_type not in ['image/jpeg', 'image/png']:
             logging.error(f"{file_type} is not supported")
-            request_id = create_job_with_status(str(uuid.uuid4()), '', 'Error', request_label)
+
             return {
                 'statusCode': 400,
                 'headers': {
@@ -68,7 +68,7 @@ def scan_requests_post_method_handler(event: dict, context) -> dict:
                 },
                 'body': json.dumps(
                     {
-                        'request_id': request_id,
+                        'request_id': 'Invalid',
                         'message': f'Invalid file type. Only JPEG and PNG are allowed.',
                         'status': "Validation Failed"
                     })
