@@ -166,7 +166,7 @@ resource "aws_lambda_function" "image_requests" {
   s3_bucket     = aws_s3_bucket.lambda_deployment_bucket.id
   s3_key        = "image_requests.zip"
   runtime       = "python3.12"
-  handler       = "image_requests.scan_requests_post_method_handler"
+  handler       = "image_requests.lambda_handler"
   role          = aws_iam_role.lambda_exec.arn
   s3_object_version = data.aws_s3_object.image_requests_zip.version_id
 
