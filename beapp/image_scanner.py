@@ -131,7 +131,8 @@ def is_label_matching(label: str, labels: dict) -> bool:
     """
     Match the label based on the labels provided and return True or False
     """
-    matching_label = [x for x in labels if x['Name'].lower() == label.lower() and x['Confidence'] > 90]
+
+    matching_label = [x for x in labels if x['Name'].lower() == label.lower() or any(alias['Name'].lower() == label.lower() for alias in x['Aliases']) and x['Confidence'] > 90]
 
     if matching_label:
         return True
