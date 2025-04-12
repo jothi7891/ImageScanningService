@@ -33,13 +33,13 @@ logging.basicConfig(level=logging.INFO,
 def lambda_handler(event: dict, context)-> dict:
     logging.info(f"Received event - {event}")
 
-    path = event.get('path')
+    resource = event.get('resource')
     http_method = event.get('httpMethod')
 
-    if path == '/scanrequest' and http_method == 'POST':
+    if resource == '/scanrequest' and http_method == 'POST':
 
         return scan_requests_post_method_handler(event, context)
-    elif '/scanrequest/' in path and http_method == 'GET':
+    elif resource == '/scanrequest/{request_id}' and http_method == 'GET':
         return scan_requests_id_get_method_handler(event, context)
 
 def scan_requests_post_method_handler(event: dict, context) -> dict:
@@ -78,7 +78,7 @@ def scan_requests_post_method_handler(event: dict, context) -> dict:
         # Check if the hash exists in the DynamoDB table which means the same image has been uploaded and can give the results without calling the recognition service, hence saving cost
         image_content = base64.b64decode(file_data)
         image_hash = sha256_of_image(image_content)
-
+        
         # Create a job in the request tracker table with pending status
         request_id = create_job_with_status(str(uuid.uuid4()), image_hash, 'pending', request_label)
 

@@ -524,3 +524,13 @@ resource "aws_iam_role_policy" "cloudwatch" {
   policy = data.aws_iam_policy_document.cloudwatch.json
 }
 
+resource "aws_lambda_permission" "apigw" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.image_requests.function_name
+
+  principal     = "apigateway.amazonaws.com"
+
+  # Grant access to all methods/resources in the API
+  source_arn = "${aws_api_gateway_rest_api.image_scan_api.execution_arn}/*/*/*"
+}
