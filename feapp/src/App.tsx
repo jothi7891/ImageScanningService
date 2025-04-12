@@ -23,6 +23,7 @@ const App: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const [requestId, setRequestId] = useState("");
+  const [inputLabel, setInputLabel] = useState("cat");
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [isCheckingStatus, setIsCheckingStatus] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -53,7 +54,7 @@ const App: React.FC = () => {
       const payload = {
         file: base64String,
         fileType: selectedImage.type,
-        label: 'cat'
+        label: inputLabel
       };
 
       try {
@@ -149,6 +150,14 @@ const App: React.FC = () => {
         </button>
       )}
 
+      <h2>Match this Label</h2>
+        <input
+          type="text"
+          value={inputLabel}
+          onChange={(e) => setInputLabel(e.target.value)}
+          placeholder="Enter input label to be matched"
+          className="job-id-input"
+        />
       {/* Display Error Messages */}
       {errorMessage && <p className="error-message">{errorMessage}</p>}
 

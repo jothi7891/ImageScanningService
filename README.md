@@ -23,11 +23,12 @@ The backend service is deployed through API Gateway with lambda integration as s
       - If its not, then an item is created in the image details table and then its scanned using AWS Rekognition service to detect the labels . It is updated to be completed.
     - The request ids matching the image hash which are in pending state are updated to be completed. Notice this could be turned in to seperate service but did not do it for simplicity
 
-
-
   
 ![image](https://github.com/user-attachments/assets/4f2af534-78c4-4b36-af2a-fc4b4da7118d)
 
+### Notes
+- Tried generalising the search to include an input label textbox so that it could be used to not only match cat but other things as well. The default value is `cat`
+- Tried to save duplication of images by comparign against the hash of the image. I have used SHA-256 which should be collision resistant in most of the cases. So this process could be beefed up.
 
 ### Bootstrapping
 
