@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
+import Loader from './components/Loader/Loader';
 import './App.css'
 
 // Define types for the response
@@ -21,10 +22,10 @@ interface ScanResult {
 
 const App: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const [requestId, setRequestId] = useState("");
   const [inputLabel, setInputLabel] = useState("cat");
-  const [isUploading, setIsUploading] = useState<boolean>(false);
   const [isCheckingStatus, setIsCheckingStatus] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [includeDebugData, setIncludeDebugData] = useState(false);
@@ -42,8 +43,7 @@ const App: React.FC = () => {
       alert("Please select an image.");
       return;
     }
-
-    setIsUploading(true);
+    setIsLoading(true)
     setErrorMessage(null);
     setScanResult(null);
 
@@ -69,7 +69,7 @@ const App: React.FC = () => {
         console.error("Error uploading the image:", error);
         setErrorMessage(error.response.data.message);
       } finally {
-        setIsUploading(false);
+        setIsLoading(false);
       }
     };
 
@@ -93,7 +93,7 @@ const App: React.FC = () => {
       setErrorMessage("Please enter a valid Request ID.");
       return;
     }
-
+    setIsLoading(true);
     setIsCheckingStatus(true);
     setErrorMessage(null);
 
@@ -112,11 +112,15 @@ const App: React.FC = () => {
       setErrorMessage("Failed to check status. Please try again.");
     } finally {
       setIsCheckingStatus(false);
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="App">
+      {isLoading && <Loader></Loader>}
+      { !isLoading &&
+      <>
       <h1>Upload an Image for Cat Detection</h1>
 
       {/* File Upload */}
@@ -144,9 +148,9 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {selectedImage && !isUploading && (
-        <button onClick={handleImageUpload} disabled={isUploading}>
-          {isUploading ? 'Uploading...' : 'Upload Image'}
+      {selectedImage && (
+        <button onClick={handleImageUpload} >
+           'Upload Image'
         </button>
       )}
 
@@ -186,7 +190,7 @@ const App: React.FC = () => {
       </div>
 
       {/* Display Job ID after successful upload */}
-      {requestId && !scanResult && !isUploading && (
+      {requestId && !scanResult && (
         <div className="job-id-display">
           <p>Your Job ID: <strong>{requestId}</strong></p>
           <p>You can now check the status of your image processing using this Job ID.</p>
@@ -215,7 +219,8 @@ const App: React.FC = () => {
         )}
         </div>
       )}
-
+      </>
+    }
     </div>
   );
 }
