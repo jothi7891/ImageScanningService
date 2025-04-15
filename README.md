@@ -28,7 +28,7 @@ The backend service is deployed through API Gateway with lambda integration as s
 
 ### Notes
 - Tried generalising the search to include an input label textbox so that it could be used to not only match cat but other things as well. The default value is `cat`
-- Tried to save duplication of images by comparign against the hash of the image. I have used SHA-256 which should be collision resistant in most of the cases. So this process could be beefed up.
+- Tried to save duplication of images by comparign against the hash of the image. I have used SHA-256 which should be collision resistant in most of the cases. But this process could be beefed up to check for other attributes to make an image unique.
 
 ### Bootstrapping
 
