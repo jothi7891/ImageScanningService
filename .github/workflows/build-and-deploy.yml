@@ -167,17 +167,16 @@ jobs:
       run:
         working-directory: ./feapp
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'  # Only run on push to main
+    if: |
+      github.event_name == 'push' && 
+      github.ref == 'refs/heads/main' &&
+      (contains(github.event.commits.*.added, 'feapp/') || 
+       contains(github.event.commits.*.modified, 'feapp/') ||
+       contains(github.event.commits.*.removed, 'feapp/'))  
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
-      - name: Get changed files
-        id: changed-files
-        uses: tj-actions/changed-files@v46
-        with:
-          files: |
-            feapp/**
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
