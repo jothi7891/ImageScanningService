@@ -92,8 +92,18 @@ jobs:
           audience: sts.amazonaws.com
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
-  
+
+      # Detect changed files
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v46
+        with:
+          files: |
+            beapp/**
+            beapp/requirements.txt
+
       - name: Zip Lambda Code
+        if: steps.changed-files.outputs.any_changed == 'true'
         run: |
           # Create a directory for the Lambda package and copy the Python files and dependencies
           mkdir -p lambda_package
@@ -118,6 +128,7 @@ jobs:
           cd ..
 
       - name: Upload to S3
+        if: steps.changed-files.outputs.any_changed == 'true'
         run: |
           aws s3 cp image_requests.zip s3://jothi-lambda-deployments/image_requests.zip
           aws s3 cp image_scanner.zip s3://jothi-lambda-deployments/image_scanner.zip
@@ -160,6 +171,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v46
+        with:
+          files: |
+            feapp/**
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
