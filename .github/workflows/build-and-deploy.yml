@@ -101,6 +101,10 @@ jobs:
           files: |
             beapp/**
             beapp/requirements.txt
+      - name: Echo variables
+        run: |
+          echo ${{github.event.commits}}
+          echo ${{github.event.commits.*}}
 
       - name: Zip Lambda Code
         if: steps.changed-files.outputs.any_changed == 'true'
